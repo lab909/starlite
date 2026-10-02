@@ -1,0 +1,17 @@
+{# Rendered on page load with `posts`, and by Datastar with the q/tag signals (whole output auto-patched by id). #}
+{% set posts = posts ?? blog.search(signals.q ?? '', signals.tag ?? '') %}
+<div id="blog-results" class="space-y-8">
+    {% for post in posts %}
+        <article>
+            <p class="text-sm text-stone-500">
+                <time datetime="{{ post.date }}">{{ post.date|date('F j, Y') }}</time>
+                · {{ post.reading_minutes }} min read
+                {% if post.draft %}<span class="ml-1 rounded bg-amber-100 px-1.5 text-amber-800">draft</span>{% endif %}
+            </p>
+            <h2 class="text-xl font-semibold"><a href="{{ path('blog_post', {slug: post.slug}) }}" class="hover:underline">{{ post.title }}</a></h2>
+            <p class="mt-1 text-stone-600">{{ post.summary }}</p>
+        </article>
+    {% else %}
+        <p class="text-stone-500">No posts found.</p>
+    {% endfor %}
+</div>

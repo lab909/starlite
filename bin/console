@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Starlite\Console\CacheClearCommand;
+use Starlite\Console\DeployCommand;
+use Symfony\Component\Console\Application;
+
+$root = dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+Starlite\Kernel::loadEnv($root);
+
+$console = new Application('Starlite');
+$console->addCommand(new DeployCommand($root));
+$console->addCommand(new CacheClearCommand($root));
+$console->run();

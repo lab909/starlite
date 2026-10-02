@@ -1,0 +1,11 @@
+/vendor/
+/node_modules/
+/public/build/
+/var/cache/*
+!/var/cache/.gitkeep
+/var/vite.hot
+/.ddev/.env*
+.env
+.env.*
+!.env.example
+/.idea

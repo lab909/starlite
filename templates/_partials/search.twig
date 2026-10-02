@@ -1,0 +1,10 @@
+{# No events queued, so the whole output is patched as elements. #}
+{% set fruits = ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange', 'Pear'] %}
+{% set query = (signals.query ?? '')|lower %}
+<ul id="results" class="list-disc pl-6">
+    {% for fruit in fruits|filter(f => query is empty or query in f|lower) %}
+        <li>{{ fruit }}</li>
+    {% else %}
+        <li>No matches</li>
+    {% endfor %}
+</ul>

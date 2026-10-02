@@ -1,0 +1,5 @@
+{% apply patch_elements %}
+    <p id="clock">Server time: {{ now }}</p>
+{% endapply %}
+
+{% do execute_script("console.log('Clock updated')") %}

@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@source "../../templates";
+
+@theme {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.heading-permalink {
+    @apply ml-2 no-underline opacity-0 transition-opacity;
+}
+
+:is(h1, h2, h3, h4, h5, h6):hover > .heading-permalink {
+    @apply opacity-60;
+}

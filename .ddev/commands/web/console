@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+## Description: Run the Starlite console (e.g. `ddev console deploy`)
+## Usage: console [command] [options]
+## Example: "ddev console deploy" "ddev console cache:clear"
+
+php bin/console "$@"

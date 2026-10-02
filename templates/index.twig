@@ -1,0 +1,31 @@
+{% extends '_layout.twig' %}
+
+{% block content %}
+    <h1 class="mb-8 text-3xl font-bold tracking-tight">Datastar demo</h1>
+
+    <section class="mb-10 space-y-3">
+        <h2 class="text-lg font-semibold">Fruit search</h2>
+        {# GET: renders _partials/search.twig, which is auto-patched by element id. #}
+        <input data-bind:query placeholder="Search…"
+               class="w-full rounded-md border border-stone-300 px-3 py-2"
+               data-on:input__debounce.200ms="{{ datastar.get('_partials/search') }}">
+        <ul id="results"></ul>
+    </section>
+
+    <section class="mb-10 space-y-3">
+        <h2 class="text-lg font-semibold">Signed template action</h2>
+        {# POST with signed, tamper-proof variables (CSRF header added automatically). #}
+        <button class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700"
+                data-on:click="{{ datastar.post('_partials/like', {fruit: 'Mango'}) }}">Like mango</button>
+        <p id="likes">Nothing liked yet.</p>
+        <p data-signals="{liked: false}" data-show="$liked" class="text-emerald-700">Thanks for the like!</p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-semibold">Custom route</h2>
+        {# POST to a custom route defined in config/routes.php. #}
+        <button class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700"
+                data-on:click="{{ datastar.action('post', path('clock')) }}">What time is it?</button>
+        <p id="clock"></p>
+    </section>
+{% endblock %}

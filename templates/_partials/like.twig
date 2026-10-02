@@ -1,0 +1,5 @@
+{% apply patch_elements %}
+    <p id="likes">You liked {{ fruit }} at {{ 'now'|date('H:i:s') }}.</p>
+{% endapply %}
+
+{% do patch_signals({liked: true}) %}
