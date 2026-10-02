@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -17,12 +18,15 @@ function starlite() {
             process.on('exit', removeHotFile);
             ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((signal) => process.on(signal, () => process.exit()));
 
-            server.watcher.add(['templates/**/*.twig', 'content/**/*.md']);
-            server.watcher.on('change', (file) => {
+            // Templates and posts are not JS modules, so Vite has no HMR for them: reload the page.
+            // (CSS and JS in resources/ are handled by Vite itself.)
+            const reload = (file) => {
                 if (/\.(twig|md)$/.test(file)) {
                     server.ws.send({ type: 'full-reload' });
                 }
-            });
+            };
+            // add/unlink too, so new and deleted templates or posts also refresh the page.
+            ['change', 'add', 'unlink'].forEach((event) => server.watcher.on(event, reload));
         },
     };
 }
@@ -36,6 +40,8 @@ export default defineConfig({
         outDir: 'public/build',
         emptyOutDir: true,
         manifest: true,
+        // Publishes source maps next to the bundle in public/build (readable source in production devtools).
+        sourcemap: true,
         rolldownOptions: {
             input: ['resources/js/app.js'],
         },
@@ -46,6 +52,8 @@ export default defineConfig({
         strictPort: true,
         origin,
         cors: { origin: process.env.DDEV_PRIMARY_URL ?? /^https?:\/\/localhost(:\d+)?$/ },
-        watch: { ignored: ['**/vendor/**', '**/var/**'] },
+        // Anchored to the project root: a bare '**/var/**' would also match the root itself (/var/www/html)
+        // and silently stop all file watching.
+        watch: { ignored: ['vendor', 'var', '.ddev'].map((dir) => path.resolve(dir) + '/**') },
     },
 });
