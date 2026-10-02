@@ -1,0 +1,6 @@
+# cachetool: lets `bin/console deploy` refresh PHP-FPM's Opcache over its FastCGI socket.
+ARG CACHETOOL_VERSION=10.0.0
+ARG CACHETOOL_SHA256=cbe90e7acdde7beafe26b592a753c2b923a99d2033e073dc55e42fba2883bd1d
+RUN curl -fsSL -o /usr/local/bin/cachetool "https://github.com/gordalina/cachetool/releases/download/${CACHETOOL_VERSION}/cachetool.phar" \
+    && echo "${CACHETOOL_SHA256}  /usr/local/bin/cachetool" | sha256sum -c - \
+    && chmod 755 /usr/local/bin/cachetool

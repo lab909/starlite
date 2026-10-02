@@ -1,6 +1,6 @@
 {% extends '_layout.twig' %}
 
-{% block title %}{{ status }} · Starlite{% endblock %}
+{% block seo %}{% do seo.title(status ~ ' ' ~ message) %}{% endblock %}
 
 {% block content %}
     <h1 class="text-3xl font-bold tracking-tight">{{ status }}</h1>

@@ -1,10 +1,6 @@
 {% extends '_layout.twig' %}
 
-{% block title %}{{ post.title }} · Starlite{% endblock %}
-
-{% block meta %}
-    <meta name="description" content="{{ post.summary }}">
-{% endblock %}
+{# SEO metadata comes from the post's front matter (Starlite\Blog\PostSeo, applied in BlogController). #}
 
 {% block content %}
     <article>
@@ -19,6 +15,10 @@
                 </p>
             {% endif %}
         </header>
+
+        {% if post.image %}
+            <img src="{{ post.image }}" alt="" class="mb-8 w-full rounded-lg">
+        {% endif %}
 
         {# Safe: Markdown is rendered with raw HTML escaped and unsafe links removed (lib/src/Blog/MarkdownParser.php). #}
         <div class="prose prose-stone max-w-none">{{ post.html|raw }}</div>

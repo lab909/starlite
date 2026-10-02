@@ -14,7 +14,7 @@
 
     <section class="mb-10 space-y-3">
         <h2 class="text-lg font-semibold">Signed template action</h2>
-        {# POST with signed, tamper-proof variables (CSRF header added automatically). #}
+        {# POST with signed, tamper-proof variables (cross-site requests are blocked by the kernel). #}
         <button class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700"
                 data-on:click="{{ datastar.post('_partials/like', {fruit: 'Mango'}) }}">Like mango</button>
         <p id="likes">Nothing liked yet.</p>
