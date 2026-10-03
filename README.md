@@ -35,8 +35,9 @@ The framework and the app are kept apart, the same way Laravel and Symfony split
 ```
 lib/                  Starlite core: the `starlite/framework` Composer package (namespace Starlite\)
   src/                Kernel, Router, Controller, Datastar Twig extension, Vite, Blog, Seo, console commands
-src/                  the app (namespace App\): controllers and other app classes
+src/                  the app (namespace App\): controllers, commands (src/Command/), other classes
 config/app.php        secret, debug flag, APP_URL, languages, site-wide SEO defaults
+config/bootstrap.php  the app's extension point: services, Twig extensions, deploy steps
 config/routes.php     routes → controllers
 content/blog/         posts: YYYY/MM/<slug>/ and drafts/<slug>/, each with index.md + its images
 templates/            Twig views; _partials/ are rendered by Datastar requests
@@ -52,6 +53,64 @@ symlinked to `vendor/starlite/framework`, so edits take effect immediately. It d
 dependencies in `lib/composer.json`; the app's `composer.json` only requires `starlite/framework`.
 Core code must never import `App\` classes. To reuse Starlite elsewhere, move `lib/` to its own
 repository and point Composer at that instead.
+
+## Building a site on Starlite
+
+A new site is a clone of this repository. **The rule: a clone never edits `lib/`.** Everything
+app-specific lives in `src/`, `config/`, `templates/`, `resources/`, `content/` and
+`translations/`, so Starlite improvements can be pulled into the clone later without conflicts
+(keep Starlite as a git remote: `git remote add starlite …`, then `git pull starlite main`).
+
+The extension points that make this possible:
+
+**`config/bootstrap.php`** receives the kernel once per request and per console run, before
+`config/routes.php`:
+
+```php
+return static function (Kernel $app): void {
+    $app->container->set(Mailer::class, fn (Kernel $app) => new Mailer(getenv('MAILER_DSN')));
+    $app->twig->addExtension(new App\Twig\AppExtension());
+    $app->twig->addGlobal('support_email', 'help@example.com');
+    $app->addDeployStep('audio', 'app:build-audio', 'Encode the sound files');
+};
+```
+
+**Services** (`$app->container`, PSR-11): a closure is a lazy, shared factory that receives the
+kernel; any other value is stored as is. Use them with `$this->get(Mailer::class)` in controllers,
+`$this->app()->container->get(...)` in commands. No autowiring, no configuration language.
+
+**Console commands:** every concrete command class in `src/Command/` (namespace `App\Command`) is
+registered automatically. Extend `Starlite\Console\AppCommand` to get the app through
+`$this->app()`; the kernel is booted only when that's first called, so `bin/console list` works even
+before the site is configured.
+
+```php
+#[AsCommand('app:build-audio', 'Encodes the sound files.')]
+final class BuildAudioCommand extends AppCommand
+{
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $root = $this->root();               // project root
+        $sounds = $this->app()->container->get(SoundCatalog::class);
+        // …
+        return Command::SUCCESS;
+    }
+}
+```
+
+**Deploy steps:** `bin/console deploy` runs named steps in order (`--list-steps` shows them).
+`$app->addDeployStep($name, $step, $description, before: …, after: …)` inserts the app's own, by
+default just before `opcache` so their output is included in the warm-up. `$step` is a console
+command name or a closure `fn (Kernel $app, SymfonyStyle $io): ?bool` (return `false` to stop the
+deploy). App steps run with the same production-mode kernel as the rest of the deploy.
+
+**Vite:** `vite.config.js` only lists the app's plugins and entry points. Starlite's part (build
+output and manifest, DDEV dev server, page reloads on template/content/translation changes,
+`VITE_PUBLIC_` env prefix) is the framework plugin `vendor/starlite/framework/resources/vite/starlite.js`;
+anything set in `vite.config.js` overrides its defaults.
+
+**Controllers** extend `Starlite\Controller`: `render()`, `stream()`, `json()`, `get()` (services),
+`path()`, `t()`, `request()`, `notFound()`.
 
 ## Local development (DDEV)
 
@@ -338,6 +397,34 @@ are **readable** in the page source: never pass secrets through them.
 
 The Datastar client (v1.0.2) is vendored in `resources/js/vendor/datastar.js` and bundled by Vite.
 
+## Testing
+
+```sh
+npm run build          # once: the app's templates include the Vite manifest
+composer test          # PHPUnit (ddev composer test)
+composer analyse       # PHPStan, level 8
+```
+
+Two suites (`phpunit.xml.dist`):
+
+- **framework** (`lib/tests/`): Starlite itself, against a small fixture project
+  (`lib/tests/data/project`) and fixture content (`lib/tests/data/content`). It travels with `lib/`
+  to every clone. It covers routing, language prefixes and redirects, stateless CSRF, errors,
+  ETag/304, Host-header independence, Datastar partials (SSE), SEO and hreflang, translations, every
+  blog rule and error message, feed/sitemap/robots, asset serving, the console and the deploy steps.
+- **app** (`tests/`): this site's controllers, routes and templates, booted with fixture content
+  (`tests/data/content`): blog pages and pagination, translated and hidden posts, Load more and
+  search partials, the language switcher, the clock action. Add your own app tests here.
+
+Tests drive the app through `Kernel::handle(Request::create(...))`, so no web server is needed.
+`Kernel::boot()` accepts config overrides for this (`content_dir`, `cache_dir`, `blog.per_page`…);
+`KernelTestCase` (framework) and `AppTestCase` (app) wrap it, plus helpers for requests, response
+bodies (including SSE streams) and temporary directories. The environment comes from
+`phpunit.xml.dist`, so a developer's `.env` never leaks into the tests.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the asset build, the tests and PHPStan on every
+push and pull request.
+
 ## Deploying
 
 ```sh
@@ -346,17 +433,20 @@ composer install --no-dev --optimize-autoloader
 php bin/console deploy      # APP_SECRET from .env or the environment
 ```
 
-`bin/console deploy` (in DDEV: `ddev console deploy`):
+`bin/console deploy` (in DDEV: `ddev console deploy`) runs these steps in order, plus any the app
+adds (see *Building a site on Starlite*; `--list-steps` prints the actual list):
 
-1. runs `composer dump-autoload --optimize --classmap-authoritative`
-2. clears `var/cache`, then compiles the routes, every Twig template, the blog posts and the Vite manifest
-3. refreshes the web server's Opcache, so the new code is used even with
-   `opcache.validate_timestamps=0`. The CLI has its own Opcache, so this always goes through the
-   web server's PHP. How it does that depends on the server, see below.
+| Step | What it does |
+|---|---|
+| `assets` | only with `--assets`: `npm run build` |
+| `composer` | `composer dump-autoload --optimize --classmap-authoritative` |
+| `cache` | empty `var/cache` |
+| `routes`, `blog`, `translations`, `templates`, `vite` | compile the routes, blog posts (and publish their files), translation catalogues, every Twig template, the Vite manifest |
+| `opcache` | refresh the web server's Opcache, so the new code is used even with `opcache.validate_timestamps=0`. The CLI has its own Opcache, so this always goes through the web server's PHP; how depends on the server, see below |
 
-Options: `--opcache=cachetool|reload|none` (default `APP_OPCACHE`, else `cachetool`), `--fcgi`,
-`--cachetool`, `--reload-cmd`, `--assets`, `--no-dev`, `--skip-composer`, `--skip-opcache`
-(same as `--opcache=none`). Set the Opcache variables once per server in its `.env`, then plain
+Options: `--skip=step,step`, `--list-steps`, `--opcache=cachetool|reload|none` (default
+`APP_OPCACHE`, else `cachetool`), `--fcgi`, `--cachetool`, `--reload-cmd`, `--assets`, `--no-dev`,
+`--skip-composer` (same as `--skip=composer`), `--skip-opcache` (same as `--opcache=none`). Set the Opcache variables once per server in its `.env`, then plain
 `php bin/console deploy` does the right thing everywhere.
 
 ### Production setups

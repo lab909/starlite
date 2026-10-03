@@ -3,15 +3,7 @@
 
 declare(strict_types=1);
 
-use Starlite\Console\CacheClearCommand;
-use Starlite\Console\DeployCommand;
-use Symfony\Component\Console\Application;
+// Framework commands plus every command in src/Command/ (see Starlite\Console\Console).
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-$root = dirname(__DIR__);
-require $root . '/vendor/autoload.php';
-Starlite\Kernel::loadEnv($root);
-
-$console = new Application('Starlite');
-$console->addCommand(new DeployCommand($root));
-$console->addCommand(new CacheClearCommand($root));
-$console->run();
+exit(Starlite\Console\Console::run(dirname(__DIR__)));
