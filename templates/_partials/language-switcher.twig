@@ -1,4 +1,5 @@
-{# The current page in every configured language; hidden when the site has only one. #}
+{# The current page in every configured language; hidden when the site has only one.
+   Where the page doesn't exist in a language (an untranslated post), its link goes to a fallback. #}
 {% set languages = language_switcher() %}
 {% if languages|length > 1 %}
     <ul class="ml-auto flex gap-3 text-sm" aria-label="{{ 'Language'|t }}">
@@ -7,7 +8,9 @@
                 {% if language.active %}
                     <span aria-current="true" class="font-semibold">{{ language.name }}</span>
                 {% else %}
-                    <a href="{{ language.url }}" hreflang="{{ language.code }}" lang="{{ language.code }}" class="text-stone-500 hover:text-stone-900">{{ language.name }}</a>
+                    {# Not available: the link goes to that language's fallback (e.g. its blog), so it's no hreflang alternate. #}
+                    <a href="{{ language.url }}" lang="{{ language.code }}"{% if language.available %} hreflang="{{ language.code }}"{% endif %}
+                       class="text-stone-500 hover:text-stone-900">{{ language.name }}</a>
                 {% endif %}
             </li>
         {% endfor %}

@@ -157,6 +157,27 @@ Markdown (GitHub-flavoured: tables, task lists, strikethrough, autolinks).
 [Download the slides](files/talk.pdf)
 ```
 
+**Translated posts.** `index.md` is the post in the default language; a translation sits next to it as
+`index.<code>.md` and shares the folder's images:
+
+```
+2026/09/hello-starlite/
+  index.md          → /blog/hello-starlite        (default language)
+  index.it.md       → /it/blog/hello-starlite
+  cover.png
+```
+
+A translation needs its own `title` (and usually `summary`); `date`, `updated`, `image` and `tags`
+are inherited from `index.md` when omitted. A post that isn't written in a language doesn't exist
+there: it's not listed, searched, counted in tags or put in that language's feed, and its URL is
+a 404 whose language switcher links to the versions that do exist. A post can also exist only in a
+non-default language (just `index.it.md`, with its own `date`).
+
+`index.md` always means the *default* language, so if you change `language` in `config/app.php`,
+rename the files to match (the old `index.it.md` becomes `index.md`, and the old `index.md` becomes
+e.g. `index.en.md`); a mismatch is reported as an error. Files for a language missing from
+`languages` are an error too.
+
 **Publishing a draft:** set its `date`, then move the folder from `drafts/` to its month
 (`git mv content/blog/drafts/my-post content/blog/2026/10/`).
 
@@ -174,6 +195,7 @@ broken image can't slip through:
 - a `date` that doesn't match the month folder
 - a linked file that's missing, outside the post folder (`..`), or not an allowed type
 - the old `slug:` and `draft:` front matter fields (rename or move the folder instead)
+- `index.<code>.md` for the default language or for a language that isn't configured
 
 Raw HTML in posts is escaped and `javascript:` links are removed, so content files cannot inject
 scripts. Headings get anchor links; external links open in a new tab with `noopener noreferrer`.
@@ -245,9 +267,10 @@ A missing translation shows the text itself, never another language. The templat
 language file only needs entries whose wording differs, or plural forms (see `translations/en.php`).
 `deploy` compiles the translations into `var/cache/translations`.
 
-Not translated yet: blog posts (they're shown as written under every language), the
-site name and description, the feed and the sitemap (default language only), and `hreflang` links
-in `<head>`.
+**Per language:** blog posts (see *Translated posts*), the blog list, search, tags, the Atom feed
+(`/it/blog/feed.xml`) and `<link rel="alternate" hreflang>` tags in `<head>` (only for versions that
+exist, plus `x-default`). The sitemap lists every language version. Not translated yet: the site
+name and description in `config/app.php`.
 
 ## SEO
 
