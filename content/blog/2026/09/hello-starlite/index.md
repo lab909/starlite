@@ -3,6 +3,7 @@ title: Hello, Starlite
 date: 2026-09-20
 summary: A database-free micro framework that serves dynamic pages at static-site speed.
 tags: [starlite, php]
+image: cover.png
 ---
 
 Starlite is a tiny PHP framework built for sites that are *mostly static* but still need a

@@ -37,11 +37,11 @@ lib/                  Starlite core: the `starlite/framework` Composer package (
 src/                  the app (namespace App\): controllers and other app classes
 config/app.php        secret, debug flag, APP_URL, site-wide SEO defaults
 config/routes.php     routes → controllers
-content/blog/*.md     blog posts (YAML front matter + Markdown)
+content/blog/         posts: YYYY/MM/<slug>/ and drafts/<slug>/, each with index.md + its images
 templates/            Twig views; _partials/ are rendered by Datastar requests
 resources/            Vite entry (js/app.js), Tailwind (css/app.css), vendored Datastar client
 bin/console           deploy, cache:clear
-public/               web root (index.php + build/ from Vite)
+public/               web root (index.php, build/ from Vite, media/ from deploy)
 var/cache/            compiled caches (safe to delete)
 ```
 
@@ -122,27 +122,72 @@ revalidate with a cheap 304.
 
 ## Blog
 
-Each `content/blog/*.md` file is a post; the file name minus an optional `YYYY-MM-DD-` prefix is
-the slug.
+Each post is a folder holding `index.md` and its own images and files. Published posts are filed
+by publication month; drafts have their own folder. The folder name is the slug, and the URL is
+always `/blog/<slug>`:
+
+```
+content/blog/
+  2026/
+    09/
+      hello-starlite/            → /blog/hello-starlite
+        index.md
+        cover.png                → /media/blog/hello-starlite/cover.png
+      markdown-cheatsheet/
+        index.md
+  drafts/
+    work-in-progress/            only visible with APP_DEBUG=1, never deployed
+      index.md
+```
 
 ```markdown
 ---
 title: Hello, Starlite      # required
-date: 2026-09-20           # required
+date: 2026-09-20           # required for published posts (optional for drafts); must match the YYYY/MM folder
 updated: 2026-09-25        # optional, last significant change (feed, sitemap, dateModified)
-image: /images/hello.jpg   # optional share image: a path in public/ or an https:// URL
+image: cover.png           # optional share image: a file in the post folder, a /path in public/ or an https:// URL
 summary: Teaser text       # optional, defaults to the first paragraph; also the meta description
 tags: [php, datastar]
-slug: custom-slug          # optional
-draft: true                # only shown with APP_DEBUG=1
 ---
 Markdown (GitHub-flavoured: tables, task lists, strikethrough, autolinks).
+
+![A diagram](diagram.webp)          ← a file next to index.md
+[Download the slides](files/talk.pdf)
 ```
+
+**Publishing a draft:** set its `date`, then move the folder from `drafts/` to its month
+(`git mv content/blog/drafts/my-post content/blog/2026/10/`).
+
+**Post files.** Relative links and images point at files in the post folder (subfolders are fine)
+and are rewritten to `/media/blog/<slug>/…`. Allowed types: jpg, jpeg, png, gif, webp, avif, svg,
+pdf, mp4, webm. Other files in a post folder are never published. In development they're served
+from the post folder by `Starlite\Blog\AssetController`; `bin/console deploy` copies the
+published posts' files to `public/media/blog/`, so in production the web server serves them
+directly. `cache:clear` removes those copies again, so development always sees the originals.
+
+**Mistakes fail loudly**, on the page in debug mode and in `deploy`, so a misfiled post or a
+broken image can't slip through:
+- a Markdown file outside `YYYY/MM/<slug>/index.md` or `drafts/<slug>/index.md`
+- a slug folder that isn't lowercase letters, digits and dashes, or a duplicate slug
+- a `date` that doesn't match the month folder
+- a linked file that's missing, outside the post folder (`..`), or not an allowed type
+- the old `slug:` and `draft:` front matter fields (rename or move the folder instead)
 
 Raw HTML in posts is escaped and `javascript:` links are removed, so content files cannot inject
 scripts. Headings get anchor links; external links open in a new tab with `noopener noreferrer`.
 The blog list at `/blog` has live search and tag filters through Datastar
 (`templates/_partials/blog-results.twig`).
+
+**Pagination.** `/blog` shows the newest posts; older ones are at `/blog/page/2`, `/blog/page/3`…
+(`/blog/page/1` redirects to `/blog`, pages past the end are 404). Each page has its own title and
+canonical URL. The pager (`templates/_partials/blog-pager.twig`) is two pagers in one:
+
+- **without JavaScript** (crawlers, no-JS visitors): numbered page links with Newer / Older
+- **with JavaScript:** Datastar hides those links and shows a **Load more** button that appends
+  the next page in place (`_partials/blog-more.twig`). It also works inside search and tag results.
+
+Posts per page: `BLOG_PER_PAGE` in `.env` (default 20, see `config/app.php`). Set it to `1` to see
+pagination with only a few posts.
 
 In production, posts are parsed once into `var/cache/blog.php`. Run `bin/console deploy`
 (or `cache:clear`) after publishing.
@@ -334,7 +379,7 @@ for Apache with mod_php.
 - Absolute URLs come from `APP_URL` only, so a forged `Host` header can't poison cached pages.
 - Secrets only come from the environment or `.env` (outside the `public/` web root, gitignored); `config/app.php` refuses to boot without `APP_SECRET`.
 - Vite only inlines variables prefixed `VITE_PUBLIC_` into the bundle, so server env vars never reach the frontend.
-- `.env`, `.env.*` (except `.env.example`), `var/cache`, `public/build` and `node_modules` are gitignored.
+- `.env`, `.env.*` (except `.env.example`), `var/cache`, `public/build`, `public/media` and `node_modules` are gitignored.
 - Responses send `X-Content-Type-Options`, `Referrer-Policy` and `X-Frame-Options` headers.
 - Non-GET requests from other sites are rejected (stateless origin check, see *CSRF and caching*).
 - Production errors are logged, never shown: visitors get a generic 500 page.

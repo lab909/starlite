@@ -1,0 +1,43 @@
+{#
+    Two pagers in one: numbered links for crawlers and visitors without JavaScript, and a
+    "Load more" button for everyone else (Datastar shows the button and hides the links).
+    `filtered` is true for search/tag results, which have no page URLs of their own.
+#}
+{% set filtered = filtered ?? false %}
+{% set shown = min(result.page * blog.perPage, result.total) %}
+<nav id="blog-pager" aria-label="Pagination" class="mt-10 space-y-4 text-sm">
+    {% if result.has_more %}
+        <div style="display: none" data-show="true" class="flex items-center gap-4">
+            <button data-on:click="$page = {{ result.page + 1 }}; {{ datastar.get('_partials/blog-more') }}"
+                    data-indicator:loading data-attr:disabled="$loading"
+                    class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700 disabled:opacity-50">
+                <span data-show="!$loading">Load more</span><span style="display: none" data-show="$loading">Loading…</span>
+            </button>
+            <span class="text-stone-500">{{ shown }} of {{ result.total }} posts</span>
+        </div>
+    {% endif %}
+
+    {% if not filtered and result.pages > 1 %}
+        <ul data-show="false" class="flex flex-wrap items-center gap-2">
+            {% if result.page > 1 %}
+                <li><a rel="prev" href="{{ result.page == 2 ? path('blog') : path('blog_page', {page: result.page - 1}) }}" class="hover:underline">← Newer</a></li>
+            {% endif %}
+            {% for n in 1..result.pages %}
+                {% if n == 1 or n == result.pages or (n - result.page)|abs <= 2 %}
+                    <li>
+                        {% if n == result.page %}
+                            <span aria-current="page" class="rounded bg-stone-900 px-2 py-1 text-white">{{ n }}</span>
+                        {% else %}
+                            <a href="{{ n == 1 ? path('blog') : path('blog_page', {page: n}) }}" class="rounded px-2 py-1 hover:bg-stone-200">{{ n }}</a>
+                        {% endif %}
+                    </li>
+                {% elseif n == 2 or n == result.pages - 1 %}
+                    <li class="text-stone-400">…</li>
+                {% endif %}
+            {% endfor %}
+            {% if result.has_more %}
+                <li><a rel="next" href="{{ path('blog_page', {page: result.page + 1}) }}" class="hover:underline">Older →</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</nav>

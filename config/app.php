@@ -14,6 +14,10 @@ return [
     'url' => $url,
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
+    'blog' => [
+        // Posts per page on /blog. Set BLOG_PER_PAGE=1 in .env to try pagination with only a few posts.
+        'per_page' => max(1, (int) (getenv('BLOG_PER_PAGE') ?: 20)),
+    ],
     // Site-wide SEO defaults; pages override them through `seo` (see README, "SEO").
     'site' => [
         'name' => 'Starlite',

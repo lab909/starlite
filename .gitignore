@@ -1,6 +1,7 @@
 /vendor/
 /node_modules/
 /public/build/
+/public/media/
 /var/cache/*
 !/var/cache/.gitkeep
 /var/vite.hot

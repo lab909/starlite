@@ -4,19 +4,23 @@ date: 2026-09-27
 tags: [markdown, guide]
 ---
 
-Every `.md` file in `content/blog` becomes a post. The file name (minus an optional date prefix)
-is the URL slug.
+Every post is a folder: `content/blog/YYYY/MM/<slug>/index.md`, next to its images. The folder
+name is the URL slug. Drafts go in `content/blog/drafts/<slug>/`.
 
 ## Front matter
 
 ```yaml
 title: Required
-date: 2026-09-27      # required, YYYY-MM-DD
+date: 2026-09-27      # required, YYYY-MM-DD, must match the YYYY/MM folder
+updated: 2026-09-30   # optional
+image: cover.png      # optional share image, a file in the post folder
 summary: Optional     # defaults to the first paragraph
 tags: [one, two]
-slug: custom-url      # optional
-draft: true           # only visible with APP_DEBUG=1
 ```
+
+## Images
+
+Put images next to `index.md` and link them relatively: `![Alt text](cover.png)`.
 
 ## GitHub-flavoured extras
 
