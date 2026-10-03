@@ -6,7 +6,7 @@
     <article>
         <header class="mb-8">
             <p class="text-sm text-stone-500">
-                <time datetime="{{ post.date }}">{{ post.date|date('F j, Y') }}</time> · {{ post.reading_minutes }} min read
+                <time datetime="{{ post.date }}">{{ post.date|format_date('long', locale: site.locale) }}</time> · {{ '{minutes} min read'|t({minutes: post.reading_minutes}) }}
             </p>
             <h1 class="mt-1 text-4xl font-bold tracking-tight">{{ post.title }}</h1>
             {% if post.tags %}
@@ -24,5 +24,5 @@
         <div class="prose prose-stone max-w-none">{{ post.html|raw }}</div>
     </article>
 
-    <p class="mt-12"><a href="{{ path('blog') }}" class="text-stone-600 hover:underline">← All posts</a></p>
+    <p class="mt-12"><a href="{{ path('blog') }}" class="text-stone-600 hover:underline">{{ '← All posts'|t }}</a></p>
 {% endblock %}

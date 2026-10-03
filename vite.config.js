@@ -18,10 +18,10 @@ function starlite() {
             process.on('exit', removeHotFile);
             ['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((signal) => process.on(signal, () => process.exit()));
 
-            // Templates and posts are not JS modules, so Vite has no HMR for them: reload the page.
+            // Templates, posts and translations are not JS modules, so Vite has no HMR for them: reload the page.
             // (CSS and JS in resources/ are handled by Vite itself.)
             const reload = (file) => {
-                if (/\.(twig|md)$/.test(file)) {
+                if (/\.(twig|md)$/.test(file) || /\/translations\/[^/]+\.php$/.test(file)) {
                     server.ws.send({ type: 'full-reload' });
                 }
             };

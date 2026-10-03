@@ -14,6 +14,14 @@ return [
     'url' => $url,
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
+    // Default language: served without a URL prefix (/blog). Every other language in `languages`
+    // gets its code as prefix (/it/blog). An Italian-only site: 'language' => 'it' and list only 'it';
+    // add 'en' later and English appears under /en/. UI texts live in translations/<code>.php.
+    'language' => 'en',
+    'languages' => [
+        'en' => ['name' => 'English', 'locale' => 'en_US'],
+        'it' => ['name' => 'Italiano', 'locale' => 'it_IT'],
+    ],
     'blog' => [
         // Posts per page on /blog. Set BLOG_PER_PAGE=1 in .env to try pagination with only a few posts.
         'per_page' => max(1, (int) (getenv('BLOG_PER_PAGE') ?: 20)),
@@ -22,7 +30,6 @@ return [
     'site' => [
         'name' => 'Starlite',
         'description' => 'A database-free PHP micro framework for static-like dynamic sites.',
-        'locale' => 'en_US',
         'image' => null,   // default share image, e.g. '/images/og-default.png'
         'author' => null,  // used for blog posts and the feed; defaults to the site name
     ],

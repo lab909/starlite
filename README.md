@@ -20,6 +20,7 @@ Starlite writes only the glue. The plumbing comes from proven libraries:
 | Console, `.env` | `symfony/console`, `symfony/dotenv` |
 | Templates | `twig/twig` |
 | Markdown | `league/commonmark` |
+| Translations, localized dates | `symfony/translation`, `twig/intl-extra` |
 | JSON-LD structured data | `spatie/schema-org` |
 | Reactivity | `starfederation/datastar-php` + the Datastar client |
 | Assets | Vite + Tailwind CSS |
@@ -35,10 +36,11 @@ The framework and the app are kept apart, the same way Laravel and Symfony split
 lib/                  Starlite core: the `starlite/framework` Composer package (namespace Starlite\)
   src/                Kernel, Router, Controller, Datastar Twig extension, Vite, Blog, Seo, console commands
 src/                  the app (namespace App\): controllers and other app classes
-config/app.php        secret, debug flag, APP_URL, site-wide SEO defaults
+config/app.php        secret, debug flag, APP_URL, languages, site-wide SEO defaults
 config/routes.php     routes → controllers
 content/blog/         posts: YYYY/MM/<slug>/ and drafts/<slug>/, each with index.md + its images
 templates/            Twig views; _partials/ are rendered by Datastar requests
+translations/         UI texts per language (en.php, it.php)
 resources/            Vite entry (js/app.js), Tailwind (css/app.css), vendored Datastar client
 bin/console           deploy, cache:clear
 public/               web root (index.php, build/ from Vite, media/ from deploy)
@@ -192,6 +194,61 @@ pagination with only a few posts.
 In production, posts are parsed once into `var/cache/blog.php`. Run `bin/console deploy`
 (or `cache:clear`) after publishing.
 
+## Languages and translations
+
+Languages are configured in `config/app.php`. The default language has no URL prefix; every other
+language is prefixed with its code:
+
+```php
+'language' => 'en',                                        // default: /blog
+'languages' => [
+    'en' => ['name' => 'English', 'locale' => 'en_US'],
+    'it' => ['name' => 'Italiano', 'locale' => 'it_IT'],   // /it/blog
+],
+```
+
+An Italian-only site sets `'language' => 'it'` and lists only `it`. Adding `en` later puts English
+under `/en/…` without changing any existing URL. A URL prefixed with the default language
+redirects to the unprefixed one (`/en/blog` → `/blog` when English is the default).
+
+**The `site` object** (`Starlite\Site`, `$this->app->site` in PHP, `site` in Twig) holds the site's
+name, description and URL, the configured languages and the current one: `site.language` (`it`),
+`site.locale` (`it_IT`), `site.defaultLanguage`, `site.languages`. `<html lang>`, `og:locale` and
+dates (`post.date|format_date('long', locale: site.locale)`) follow the current language.
+
+**Links** stay in the current language: `path('blog')` gives `/it/blog` on Italian pages, and
+`path('blog', {}, 'en')` targets a specific language (`$this->path(...)` in controllers). Datastar
+requests carry the language too.
+
+**Language switcher:** `language_switcher()` in Twig and `$this->app->site->switcher()` in PHP
+return the current page in every language (`code`, `name`, `url`, `active`).
+`templates/_partials/language-switcher.twig` renders it in the navigation, and only when the site
+has more than one language.
+
+**UI texts:** `translations/<code>.php` returns `[text => translation]`. Write the texts in your
+templates' language and wrap them:
+
+```twig
+{{ 'Load more'|t }}
+{{ '{shown} of {total} posts'|t({shown: 20, total: 45}) }}
+{{ t('Blog') }}
+```
+
+In PHP: `$this->t('Post not found.')` in controllers, `$app->t(...)` elsewhere. Messages use ICU
+MessageFormat through `symfony/translation`, so placeholders and plurals work:
+
+```php
+'{minutes} min read' => '{minutes, plural, one {# minuto di lettura} other {# minuti di lettura}}',
+```
+
+A missing translation shows the text itself, never another language. The templates' own
+language file only needs entries whose wording differs, or plural forms (see `translations/en.php`).
+`deploy` compiles the translations into `var/cache/translations`.
+
+Not translated yet: blog posts (they're shown as written under every language), the
+site name and description, the feed and the sitemap (default language only), and `hreflang` links
+in `<head>`.
+
 ## SEO
 
 Every page gets a `<title>`, meta description, canonical link, Open Graph and Twitter card tags,
@@ -201,7 +258,7 @@ and optional JSON-LD blocks. They're all printed once by `{{ seo_tags() }}` in `
   summary, image, `og:type=article` with published/modified dates and tags, and a `BlogPosting`
   JSON-LD block. Drafts get `noindex`.
 - **Error pages** get `noindex`.
-- **Site defaults** (name, description, locale, default image, author) live in `config/app.php`
+- **Site defaults** (name, description, default image, author) live in `config/app.php`
   under `site`.
 
 Set page metadata from a controller:

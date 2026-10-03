@@ -5,6 +5,6 @@
     {% for fruit in fruits|filter(f => query is empty or query in f|lower) %}
         <li>{{ fruit }}</li>
     {% else %}
-        <li>No matches</li>
+        <li>{{ 'No matches'|t }}</li>
     {% endfor %}
 </ul>

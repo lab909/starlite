@@ -1,18 +1,18 @@
 {% extends '_layout.twig' %}
 
 {% block content %}
-    <h1 class="mb-1 text-3xl font-bold tracking-tight">Blog</h1>
-    <p class="mb-6 text-sm"><a href="{{ path('blog_feed') }}" class="text-stone-500 hover:underline">Atom feed</a></p>
+    <h1 class="mb-1 text-3xl font-bold tracking-tight">{{ 'Blog'|t }}</h1>
+    <p class="mb-6 text-sm"><a href="{{ path('blog_feed') }}" class="text-stone-500 hover:underline">{{ 'Atom feed'|t }}</a></p>
 
     {# page: the last page shown, so "Load more" knows what comes next. Search and tags restart at 1. #}
     <div data-signals="{q: '', tag: '', page: {{ result.page }}}" class="mb-8 space-y-3">
-        <input type="search" data-bind:q placeholder="Search posts…"
+        <input type="search" data-bind:q placeholder="{{ 'Search posts…'|t }}"
                class="w-full rounded-md border border-stone-300 px-3 py-2"
                data-on:input__debounce.200ms="$page = 1; {{ datastar.get('_partials/blog-results') }}">
         <div class="flex flex-wrap gap-2 text-sm">
             <button data-on:click="$tag = ''; $page = 1; {{ datastar.get('_partials/blog-results') }}"
                     data-class:bg-stone-900="$tag === ''" data-class:text-white="$tag === ''"
-                    class="rounded-full border border-stone-300 px-3 py-1">all</button>
+                    class="rounded-full border border-stone-300 px-3 py-1">{{ 'all'|t }}</button>
             {% for tag, count in blog.tags %}
                 <button data-on:click="$tag = {{ tag|json_encode }}; $page = 1; {{ datastar.get('_partials/blog-results') }}"
                         data-class:bg-stone-900="$tag === {{ tag|json_encode }}" data-class:text-white="$tag === {{ tag|json_encode }}"

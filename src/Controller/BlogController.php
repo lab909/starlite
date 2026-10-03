@@ -13,20 +13,20 @@ use Symfony\Component\HttpFoundation\Response;
 final class BlogController extends Controller
 {
     /** /blog is page 1; /blog/page/2 onwards are the older posts. */
-    public function index(string $page = '1'): string|Response
+    public function index(?string $page = null): string|Response
     {
-        $page = (int) $page;
-        if ($page === 1 && $this->request()->getPathInfo() !== '/blog') {
-            return new RedirectResponse($this->app->router->generate('blog'), Response::HTTP_MOVED_PERMANENTLY);
+        if ($page === '1') {
+            return new RedirectResponse($this->path('blog'), Response::HTTP_MOVED_PERMANENTLY);
         }
+        $page = (int) ($page ?? 1);
         $result = $this->app->blog->page($page);
         if ($page > $result['pages']) {
-            return $this->notFound('Page not found.');
+            return $this->notFound($this->t('Page not found.'));
         }
 
         $seo = $this->app->seo
-            ->title($page === 1 ? 'Blog' : "Blog · Page {$page}")
-            ->description('Articles about ' . $this->app->seo->site['name'] . '.');
+            ->title($page === 1 ? $this->t('Blog') : $this->t('Blog · Page {page}', ['page' => $page]))
+            ->description($this->t('Articles about {site}.', ['site' => $this->app->site->name]));
         $seo->schema(Schema::blog()->name($seo->pageTitle())->url($seo->canonicalUrl()));
 
         return $this->render('blog/index.twig', ['result' => $result]);
@@ -36,7 +36,7 @@ final class BlogController extends Controller
     {
         $post = $this->app->blog->find($slug);
         if ($post === null) {
-            return $this->notFound('Post not found.');
+            return $this->notFound($this->t('Post not found.'));
         }
         PostSeo::apply($this->app->seo, $post);
 

@@ -1,0 +1,15 @@
+{# The current page in every configured language; hidden when the site has only one. #}
+{% set languages = language_switcher() %}
+{% if languages|length > 1 %}
+    <ul class="ml-auto flex gap-3 text-sm" aria-label="{{ 'Language'|t }}">
+        {% for language in languages %}
+            <li>
+                {% if language.active %}
+                    <span aria-current="true" class="font-semibold">{{ language.name }}</span>
+                {% else %}
+                    <a href="{{ language.url }}" hreflang="{{ language.code }}" lang="{{ language.code }}" class="text-stone-500 hover:text-stone-900">{{ language.name }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

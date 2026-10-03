@@ -4,7 +4,7 @@
         {% for post in result.posts %}
             {% include '_partials/blog-card.twig' %}
         {% else %}
-            <p class="text-stone-500">No posts found.</p>
+            <p class="text-stone-500">{{ 'No posts found.'|t }}</p>
         {% endfor %}
     </div>
     {% include '_partials/blog-pager.twig' %}
