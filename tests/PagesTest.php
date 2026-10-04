@@ -55,4 +55,12 @@ final class PagesTest extends AppTestCase
             self::assertStringContainsString('<input type="radio" name="theme" value="' . $theme . '" class="sr-only" data-bind:_theme>', $html);
         }
     }
+
+    public function testTheFontIsSelfHostedAndPreloaded(): void
+    {
+        $html = self::body($this->request($this->app(), '/'));
+
+        self::assertMatchesRegularExpression('#<link rel="preload" href="/build/assets/inter-latin-wght-normal-[^"]+\.woff2" as="font" type="font/woff2" crossorigin>#', $html);
+        self::assertStringNotContainsString('fonts.googleapis.com', $html);
+    }
 }

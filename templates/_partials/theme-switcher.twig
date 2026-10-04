@@ -3,9 +3,9 @@
    Native radio buttons: arrow keys and screen readers work as for any radio group.
    Hidden until Datastar runs: without JavaScript the site follows the system setting. #}
 {% set themes = {
-    light: {label: 'Light theme'|t, icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'},
-    dark: {label: 'Dark theme'|t, icon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>'},
-    system: {label: 'System theme'|t, icon: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'},
+    light: {label: 'Light theme'|t, icon: 'icon-[lucide--sun]'},
+    dark: {label: 'Dark theme'|t, icon: 'icon-[lucide--moon]'},
+    system: {label: 'System theme'|t, icon: 'icon-[lucide--monitor]'},
 } %}
 <fieldset class="flex rounded-full border border-line p-0.5" data-signals:_theme="'system'" data-show="true" style="display: none">
     <legend class="sr-only">{{ 'Theme'|t }}</legend>
@@ -13,7 +13,8 @@
         <label class="cursor-pointer rounded-full p-1.5 text-subtle hover:text-strong has-checked:bg-chip has-checked:text-strong has-focus-visible:outline-2 has-focus-visible:outline-primary"
                title="{{ theme.label }}">
             <input type="radio" name="theme" value="{{ value }}" class="sr-only" data-bind:_theme>
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ theme.icon|raw }}</svg>
+            {# Full class names in the template, so Tailwind finds them (icons are only built when used). #}
+            <span class="{{ theme.icon }} block size-4" aria-hidden="true"></span>
             <span class="sr-only">{{ theme.label }}</span>
         </label>
     {% endfor %}

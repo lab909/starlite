@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/*
+ * Self-hosted font: bundled by Vite into public/build with a hashed name, so there are no requests
+ * to Google or any other host (privacy, offline, CSP). The variable font covers every weight in one
+ * file per script; browsers only download the scripts a page uses (unicode-range). The layout
+ * preloads the Latin file: {{ vite_preload(...) }}.
+ */
+@import "@fontsource-variable/inter/wght.css";
+
+/*
+ * Icons: `<span class="icon-[lucide--sun]"></span>`. Only the icons used in templates end up in the
+ * CSS, as SVG masks coloured with currentColor; size them with size-* classes. Browse icon sets at
+ * https://icon-sets.iconify.design and install one with `npm i -D @iconify-json/<set>` (Lucide is
+ * installed). Your own SVGs go in resources/icons/: `icon-[app--<file name>]`.
+ */
+@plugin "@iconify/tailwind4" {
+    icon-sets: from-folder(app, "./resources/icons");
+}
+
 @source "../../templates";
 /* The documentation (maintainers' clone) is a separate site: keep its Markdown out of the class scan. */
 @source not "../../docs";
@@ -16,7 +34,7 @@
  * Form controls and scrollbars follow `color-scheme` too.
  */
 @theme {
-    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
     --color-page: light-dark(var(--color-stone-50), var(--color-stone-950));         /* page background */
     --color-surface: light-dark(var(--color-white), var(--color-stone-900));         /* header, inputs */

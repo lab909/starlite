@@ -101,10 +101,17 @@ colour tokens with `light-dark()` in `resources/css/app.css`, so the system sett
 JavaScript; a radio-group toggle in the header; templates converted to tokens. Also: `cache:clear`
 now rebuilds the normal Composer autoloader after a deploy. Docs: "Dark & light theme".
 
-### [ ] Self-hosted fonts and icons
+### [x] Self-hosted fonts and icons
 Fonts bundled through Vite (e.g. `@fontsource`) instead of Google Fonts: no third-party requests
 (privacy/GDPR), works offline, compatible with a strict CSP. Icon fonts (Material Symbols is ~3 MB)
 subset to the icons actually used.
+
+Done: Inter from Fontsource bundled by Vite (hashed files in public/build, only the scripts a page
+uses are downloaded) and preloaded with the new `{{ vite_preload() }}`; icons through the Iconify
+Tailwind plugin (`icon-[lucide--sun]`, only used icons are built, any Iconify set incl. Material
+Symbols) plus custom SVGs in `resources/icons/` (`icon-[app--name]`; Vite restarts when they change).
+Fixed on the way: Vite's `base` is now `/build/` for builds, so files referenced from CSS resolve.
+Docs: "Fonts & icons".
 
 ### [ ] UI building blocks
 Accessible Twig macros wired to Datastar: dialog / bottom sheet (native `<dialog>`), toast
@@ -117,7 +124,7 @@ The main missing security header. Use **hashes** of the few inline scripts (the 
 the JSON config is a data block, which CSP doesn't apply to), computed at build time, not per-request nonces: a nonce would make every response
 different and break ETags, public caching and the static export. Datastar needs `'unsafe-eval'`;
 the rest stays locked down (`default-src 'self'`, `object-src 'none'`, `base-uri 'self'`,
-`frame-ancestors 'self'`), with `media-src` / `worker-src` / CDN hosts from config.
+`frame-ancestors 'self'`, `img-src 'self' data:` for the icon masks; verify in a browser), with `media-src` / `worker-src` / CDN hosts from config.
 
 ### [ ] Data collections
 Structured content beyond blog posts (catalogues, FAQs, team, products…): `content/<collection>/`
@@ -177,7 +184,7 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 ## Suggested order
 
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
-2. ~~Page-specific JS + Datastar pattern, theme~~, fonts/icons, CSP (section 2): what an app like
+2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons~~, CSP (section 2): what an app like
    Nocturne needs on day one
 3. Data collections, content pages, UI building blocks, helpers, PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them

@@ -11,13 +11,15 @@
     <link rel="alternate" type="application/atom+xml" title="{{ site.name }} — {{ 'Blog'|t }}" href="{{ path('blog_feed') }}">
     {# Values from config/app.php `public` for page scripts (only those: it's an allowlist). #}
     {{ public_config() }}
+    {# The self-hosted font's main file (resources/css/app.css), so text doesn't wait for the CSS to be parsed. #}
+    {{ vite_preload('node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') }}
     {# Pages add their own bundles with {% set page_scripts = ['resources/js/pages/<name>.js'] %}. #}
     {{ vite('resources/js/app.js', page_scripts ?? []) }}
 </head>
 <body class="min-h-screen bg-page text-ink antialiased">
     <header class="border-b border-line bg-surface">
         <nav class="mx-auto flex max-w-3xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4">
-            <a href="{{ path('home') }}" class="font-semibold tracking-tight">{{ site.name }}</a>
+            <a href="{{ path('home') }}" class="flex items-center gap-1.5 font-semibold tracking-tight"><span class="icon-[app--starlite] size-5" aria-hidden="true"></span>{{ site.name }}</a>
             <a href="{{ path('blog') }}" class="text-muted hover:text-strong">{{ 'Blog'|t }}</a>
             <div class="ml-auto flex items-center gap-4">
                 {% include '_partials/language-switcher.twig' %}
