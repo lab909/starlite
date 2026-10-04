@@ -70,8 +70,28 @@ final class PagesTest extends AppTestCase
         $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
         self::assertTrue($app->posts()->exists());
         self::assertNotEmpty($app->collections->warmup());
+        self::assertTrue($app->pages()->exists());
+        self::assertSame([], $app->shadowedPages(), 'no content page hidden behind a route');
 
         self::assertMatchesRegularExpression('#What is Starlite\?.*Where does the content live\?.*How fast is it\?#s', self::body($this->request($app, '/')));
         self::assertMatchesRegularExpression('#Che cos&\#039;è Starlite\?.*Dove si trovano i contenuti\?.*Quanto è veloce\?#s', self::body($this->request($app, '/it')));
+    }
+
+    public function testContentPagesWithTheirTemplatesAndTheFooterMenu(): void
+    {
+        $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
+
+        $about = self::body($this->request($app, '/about'));
+        self::assertStringContainsString('<title>About · Starlite</title>', $about);
+        self::assertStringContainsString('href="/about/credits"', $about, 'pages/about.twig lists the child pages');
+        self::assertMatchesRegularExpression('#<footer.*href="/about".*href="/privacy".*</footer>#s', $about, 'menu in `order`');
+
+        $credits = self::body($this->request($app, '/it/about/credits'));
+        self::assertStringContainsString('<h1 class="mb-8 text-4xl font-bold tracking-tight">Riconoscimenti</h1>', $credits);
+        self::assertMatchesRegularExpression('#<a href="/it/about"[^>]*>← Chi siamo</a>#', $credits, 'link to the parent page');
+
+        $missing = $this->request($app, '/nope');
+        self::assertSame(404, $missing->getStatusCode());
+        self::assertStringContainsString('Page not found.', self::body($missing));
     }
 }

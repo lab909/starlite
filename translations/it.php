@@ -5,6 +5,7 @@ return [
     // Navigation and layout
     'Blog' => 'Blog',
     'Language' => 'Lingua',
+    'Site' => 'Sito',
     'Theme' => 'Tema',
     'Light theme' => 'Tema chiaro',
     'Dark theme' => 'Tema scuro',

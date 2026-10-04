@@ -185,12 +185,21 @@ their old query methods and the two globals are gone; the skeleton's templates, 
 sitemap and feed use queries. `paginate()` returns `items` and `per_page`. Docs: Basics → Querying
 content; the scope rule is in Philosophy.
 
-### [ ] Markdown content pages (singles)
+### [x] Markdown content pages (singles)
 `content/pages/<path>/index.md` (+ `index.<code>.md`, images) for About, Privacy, Imprint, Contact…,
 reusing the blog machinery (front matter, assets, translations, SEO, sitemap). Nested folders give
 nested URLs (`content/pages/about/team/` → `/about/team`). An optional `template:` in the front
 matter renders a page with its own Twig template (a contact page: text from Markdown, the form in
 the template, a POST route for it). Queried with `pages()` in the same API.
+
+Done: `Starlite\Pages` compiles `content/pages/<path>/index.md` (+ translations inheriting image,
+template, order, updated and `data`; files next to the page at `/media/pages/<path>/`), with
+`path`, `parent`, `depth` for menus and trees, an optional `template:` and a free-form `data:`
+mapping. `pages()` in the query API; the skeleton's `PageController` and a catch-all route with the
+new route `priority` (-1), so other routes always win; `deploy` refuses pages hidden behind a route.
+PageSeo (WebPage JSON-LD), sitemap entries with `lastmod`, `cache:clear` clears published page
+files. Front matter YAML errors now name the file (posts too). Demo: Privacy, About (own template
+listing its children) and About → Credits, plus a footer menu. Docs: Content → Content pages.
 
 ### [ ] Small helpers
 - [x] `$this->json($data)` in controllers for app data endpoints
@@ -245,7 +254,7 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
 2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2)~~: what an app like
    Nocturne needs on day one
-3. ~~Data collections~~, content query API, content pages, media embeds, UI building blocks, helpers,
+3. ~~Data collections, content query API, content pages~~, media embeds, UI building blocks, helpers,
    PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 

@@ -1,0 +1,22 @@
+{% extends 'page.twig' %}
+
+{# Chosen by `template: pages/about.twig` in content/pages/about/index.md: the page's text, then its
+   child pages, queried here. #}
+
+{% block content %}
+    {{ parent() }}
+
+    {% set children = pages().where('parent', page.path).orderBy('order, title') %}
+    {% if children.exists %}
+        <ul class="mt-10 grid gap-4 sm:grid-cols-2">
+            {% for child in children %}
+                <li>
+                    <a href="{{ path('page', {path: child.path}) }}" class="block rounded-md border border-line bg-surface p-4 hover:border-line-strong">
+                        <span class="font-medium">{{ child.title }}</span>
+                        <span class="mt-1 block text-sm text-muted">{{ child.summary }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

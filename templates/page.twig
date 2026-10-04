@@ -1,0 +1,18 @@
+{% extends '_layout.twig' %}
+
+{# A content page (content/pages/<path>/index.md); SEO comes from its front matter (Starlite\Pages\PageSeo,
+   applied in PageController). Pages with `template:` in their front matter use that template instead. #}
+
+{% block content %}
+    <article>
+        {% if page.parent %}
+            {% set parent = pages().where('path', page.parent).one() %}
+            {% if parent %}
+                <p class="mb-2 text-sm"><a href="{{ path('page', {path: parent.path}) }}" class="text-muted hover:underline">← {{ parent.title }}</a></p>
+            {% endif %}
+        {% endif %}
+        <h1 class="mb-8 text-4xl font-bold tracking-tight">{{ page.title }}</h1>
+        {# Safe: Markdown is rendered with raw HTML escaped and unsafe links removed. #}
+        <div class="prose prose-stone dark:prose-invert max-w-none">{{ page.html|raw }}</div>
+    </article>
+{% endblock %}

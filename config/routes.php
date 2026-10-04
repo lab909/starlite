@@ -5,10 +5,13 @@ declare(strict_types=1);
 use App\Controller\BlogController;
 use App\Controller\ClockController;
 use App\Controller\HomeController;
+use App\Controller\PageController;
 use Starlite\Blog\AssetController;
 use Starlite\Blog\Blog;
 use Starlite\Blog\FeedController;
 use Starlite\Kernel;
+use Starlite\Pages\AssetController as PageAssetController;
+use Starlite\Pages\Pages;
 use Starlite\Seo\RobotsController;
 use Starlite\Seo\SitemapController;
 
@@ -29,4 +32,9 @@ return static function (Kernel $app): void {
 
     // Datastar actions
     $app->post('/clock', ClockController::class, 'clock');
+
+    // Content pages: content/pages/privacy/index.md is /privacy. A catch-all, so it has a low priority:
+    // every other route wins, wherever it's added. `deploy` reports pages that a route hides.
+    $app->get(Pages::ASSET_URL . '/{file}', PageAssetController::class, 'page_asset', ['file' => '.+']);
+    $app->get('/{path}', [PageController::class, 'show'], 'page', ['path' => Pages::PATH], priority: -1);
 };
