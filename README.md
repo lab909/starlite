@@ -1,556 +1,67 @@
 # Starlite
 
-A tiny, database-free PHP micro framework for static-like dynamic sites:
-**Datastar** (PHP SDK) for reactivity, **Symfony Routing**, **Twig**, a **Markdown** blog,
-and **Vite + Tailwind CSS** for assets, with Open Graph, JSON-LD, an Atom feed and a sitemap
-built in. Requires PHP 8.4.
+A tiny, database-free PHP micro framework for static-like dynamic sites: **Datastar** for
+reactivity, **Symfony Routing**, **Twig**, a **Markdown blog** with translations, **SEO** (Open Graph,
+JSON-LD, hreflang, sitemap, feeds) and **Vite + Tailwind CSS**. Requires PHP 8.4.
 
-Everything a request needs is compiled ahead of time into plain PHP files in `var/cache`
-(routes, Twig templates, blog posts, the Vite manifest). Opcache keeps those in shared memory,
-so a production request does no parsing, no database queries and no file scanning.
+Everything a request needs is compiled ahead of time into plain PHP files in `var/cache`, which
+Opcache keeps in shared memory: no parsing, no database queries, no file scanning per request.
 
-Starlite writes only the glue. The plumbing comes from proven libraries:
+**📖 Documentation: https://lab909.github.io/starlite-framework-docs/** (source in `docs/`)
 
-| Concern | Library |
-|---|---|
-| Requests and responses | `symfony/http-foundation` |
-| Routing | `symfony/routing` (compiled matcher and generator) |
-| CSRF protection | `symfony/security-csrf` (`SameOriginCsrfTokenManager`, stateless) |
-| Error handling | `symfony/error-handler` |
-| Console, `.env` | `symfony/console`, `symfony/dotenv` |
-| Templates | `twig/twig` |
-| Markdown | `league/commonmark` |
-| Translations, localized dates | `symfony/translation`, `twig/intl-extra` |
-| JSON-LD structured data | `spatie/schema-org` |
-| Reactivity | `starfederation/datastar-php` + the Datastar client |
-| Assets | Vite + Tailwind CSS |
-| Opcache refresh on deploy | [cachetool](https://github.com/gordalina/cachetool) |
+## Quick start (DDEV)
 
-Starlite's own code: the kernel that ties these together, the Craft-style Datastar Twig
-extension, the Vite manifest helper and the blog compile step.
-
-The framework and the app are kept apart, the same way Laravel and Symfony split
-`laravel/framework` from the app skeleton:
-
-```
-lib/                  Starlite core: the `starlite/framework` Composer package (namespace Starlite\)
-  src/                Kernel, Router, Controller, Datastar Twig extension, Vite, Blog, Seo, console commands
-src/                  the app (namespace App\): controllers, commands (src/Command/), other classes
-config/app.php        secret, debug flag, APP_URL, languages, site-wide SEO defaults
-config/bootstrap.php  the app's extension point: services, Twig extensions, deploy steps
-config/routes.php     routes → controllers
-content/blog/         posts: YYYY/MM/<slug>/ and drafts/<slug>/, each with index.md + its images
-templates/            Twig views; _partials/ are rendered by Datastar requests
-translations/         UI texts per language (en.php, it.php)
-resources/            Vite entry (js/app.js), Tailwind (css/app.css), vendored Datastar client
-bin/console           deploy, cache:clear
-public/               web root (index.php, build/ from Vite, media/ from deploy)
-var/cache/            compiled caches (safe to delete)
+```sh
+git clone --recurse-submodules git@github.com:lab909/starlite-framework.git my-site
+cd my-site
+cp .env.example .env         # set APP_SECRET (openssl rand -hex 32), APP_URL and APP_DEBUG=1
+ddev start
+ddev composer install
+ddev npm install
+ddev npm run dev             # Vite + Tailwind with hot reload
 ```
 
-`lib/` is installed through a Composer [path repository](https://getcomposer.org/doc/05-repositories.md#path),
-symlinked to `vendor/starlite/framework`, so edits take effect immediately. It declares its own
-dependencies in `lib/composer.json`; the app's `composer.json` only requires `starlite/framework`.
-Core code must never import `App\` classes. To reuse Starlite elsewhere, move `lib/` to its own
-repository and point Composer at that instead.
+Open `https://<project>.ddev.site`. See [Installation](https://lab909.github.io/starlite-framework-docs/1.x/getting-started/installation)
+for the details and for setups without DDEV.
 
 ## Building a site on Starlite
 
-A new site is a clone of this repository. **The rule: a clone never edits `lib/`.** Everything
-app-specific lives in `src/`, `config/`, `templates/`, `resources/`, `content/` and
-`translations/`, so Starlite improvements can be pulled into the clone later without conflicts
-(keep Starlite as a git remote: `git remote add starlite …`, then `git pull starlite main`).
+A new site is a clone of this repository that **never edits `lib/`**: routes in
+`config/routes.php`, services and deploy steps in `config/bootstrap.php`, code in `src/`, templates
+in `templates/`, posts in `content/`. Keep Starlite as a git remote to pull framework updates.
+See [Building a site on Starlite](https://lab909.github.io/starlite-framework-docs/1.x/extending/).
 
-The extension points that make this possible:
-
-**`config/bootstrap.php`** receives the kernel once per request and per console run, before
-`config/routes.php`:
-
-```php
-return static function (Kernel $app): void {
-    $app->container->set(Mailer::class, fn (Kernel $app) => new Mailer(getenv('MAILER_DSN')));
-    $app->twig->addExtension(new App\Twig\AppExtension());
-    $app->twig->addGlobal('support_email', 'help@example.com');
-    $app->addDeployStep('audio', 'app:build-audio', 'Encode the sound files');
-};
-```
-
-**Services** (`$app->container`, PSR-11): a closure is a lazy, shared factory that receives the
-kernel; any other value is stored as is. Use them with `$this->get(Mailer::class)` in controllers,
-`$this->app()->container->get(...)` in commands. No autowiring, no configuration language.
-
-**Console commands:** every concrete command class in `src/Command/` (namespace `App\Command`) is
-registered automatically. Extend `Starlite\Console\AppCommand` to get the app through
-`$this->app()`; the kernel is booted only when that's first called, so `bin/console list` works even
-before the site is configured.
-
-```php
-#[AsCommand('app:build-audio', 'Encodes the sound files.')]
-final class BuildAudioCommand extends AppCommand
-{
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $root = $this->root();               // project root
-        $sounds = $this->app()->container->get(SoundCatalog::class);
-        // …
-        return Command::SUCCESS;
-    }
-}
-```
-
-**Deploy steps:** `bin/console deploy` runs named steps in order (`--list-steps` shows them).
-`$app->addDeployStep($name, $step, $description, before: …, after: …)` inserts the app's own, by
-default just before `opcache` so their output is included in the warm-up. `$step` is a console
-command name or a closure `fn (Kernel $app, SymfonyStyle $io): ?bool` (return `false` to stop the
-deploy). App steps run with the same production-mode kernel as the rest of the deploy.
-
-**Vite:** `vite.config.js` only lists the app's plugins and entry points. Starlite's part (build
-output and manifest, DDEV dev server, page reloads on template/content/translation changes,
-`VITE_PUBLIC_` env prefix) is the framework plugin `vendor/starlite/framework/resources/vite/starlite.js`;
-anything set in `vite.config.js` overrides its defaults.
-
-**Controllers** extend `Starlite\Controller`: `render()`, `stream()`, `json()`, `get()` (services),
-`path()`, `t()`, `request()`, `notFound()`.
-
-## Local development (DDEV)
+## Common commands
 
 ```sh
-cp .env.example .env         # then set APP_SECRET (openssl rand -hex 32), APP_URL=https://starlite-framework.ddev.site and APP_DEBUG=1
-ddev restart                 # exposes the Vite port, installs cachetool (.ddev/web-build)
-ddev composer install
-ddev npm install
-ddev npm run dev             # Vite + Tailwind with hot reload on https://starlite-framework.ddev.site:5173
+ddev composer test           # PHPUnit: framework and app suites
+ddev composer analyse        # PHPStan, level 8
+ddev console deploy          # production build + Opcache refresh
+ddev console cache:clear     # back to development after a deploy
 ```
 
-Open https://starlite-framework.ddev.site. Editing a template or a post reloads the page.
-
-## Environment
-
-Settings are read from the environment, with a gitignored `.env` file in the project root as the
-fallback (loaded by `symfony/dotenv` in `Kernel::loadEnv()`, for both web requests and `bin/console`).
-Variables the server already sets (DDEV `web_environment`, PHP-FPM `env[...]`, nginx
-`fastcgi_param`) win over `.env`. `.env.example` lists every variable and is the only one committed.
-
-With `APP_DEBUG=1` nothing is cached, drafts are visible, errors show Symfony's exception page and `var/vite.hot` (written while
-`npm run dev` runs) points pages at the dev server. Without it, `npm run build` output is used.
-If Vite was killed hard and pages still point at port 5173, delete `var/vite.hot`.
-
-## Routing
-
-`config/routes.php` uses Symfony Routing under the hood, so placeholders, requirements and named
-routes work as in Symfony. A handler is a `[Controller::class, 'method']` pair, an invokable
-controller class, or a closure; placeholders arrive as named arguments:
-
-```php
-$app->get('/blog/{slug}', [BlogController::class, 'show'], 'blog_post', ['slug' => '[a-z0-9-]+']);
-$app->post('/clock', ClockController::class, 'clock');
-$app->route(['PUT', 'PATCH'], '/items/{id}', [ItemController::class, 'update'], 'item_update', ['id' => '\d+']);
-```
-
-Controllers live in `src/Controller` and extend `Starlite\Controller`, which gives them the kernel
-(`$this->app`) plus `request()`, `render()`, `stream()` and `notFound()`. An action returns an HTML
-string or any Symfony `Response` (JSON, redirects, files…). Only the matched controller is instantiated.
-
-```php
-final class BlogController extends Controller
-{
-    public function show(string $slug): string|Response
-    {
-        $post = $this->app->blog->find($slug);
-
-        return $post === null ? $this->notFound() : $this->render('blog/post.twig', ['post' => $post]);
-    }
-}
-```
-
-In Twig: `{{ path('blog_post', {slug: post.slug}) }}`. Unknown paths get a 404, wrong methods a
-405, and in production any exception is logged and becomes a 500 (all render `templates/_error.twig`).
-
-`Kernel::handle(Request): Response` has no side effects, so the whole app can be exercised in
-tests without a web server: `$app->handle(Request::create('/blog'))`.
-
-### CSRF and caching
-
-CSRF protection is stateless: for every non-GET route, the browser's `Sec-Fetch-Site` (or
-`Origin`/`Referer`) header must show the request came from this site, otherwise it gets a 403.
-There is no token, no cookie and no session. Every browser sends these headers on `fetch()`, which is
-how Datastar makes its requests. Behind a reverse proxy, set `APP_TRUSTED_PROXIES` so the origin
-check sees the public host and scheme.
-
-Because nothing is per-visitor, every page is identical for everyone: GET responses are sent
-`Cache-Control: public, no-cache` with an ETag, so browsers and proxies can store them and
-revalidate with a cheap 304.
-
-## Blog
-
-Each post is a folder holding `index.md` and its own images and files. Published posts are filed
-by publication month; drafts have their own folder. The folder name is the slug, and the URL is
-always `/blog/<slug>`:
+## Repository layout
 
 ```
-content/blog/
-  2026/
-    09/
-      hello-starlite/            → /blog/hello-starlite
-        index.md
-        cover.png                → /media/blog/hello-starlite/cover.png
-      markdown-cheatsheet/
-        index.md
-  drafts/
-    work-in-progress/            only visible with APP_DEBUG=1, never deployed
-      index.md
+lib/          the framework (starlite/framework, a Composer path package): never edited by sites
+config/       app settings, bootstrap hook, routes
+src/          the app (App\): controllers, commands
+templates/    Twig views          content/     blog posts      translations/  UI texts
+resources/    CSS, JS, Datastar   public/      web root        tests/         app tests
+docs/         documentation (git submodule, VitePress)
 ```
 
-```markdown
----
-title: Hello, Starlite      # required
-date: 2026-09-20           # required for published posts (optional for drafts); must match the YYYY/MM folder
-updated: 2026-09-25        # optional, last significant change (feed, sitemap, dateModified)
-image: cover.png           # optional share image: a file in the post folder, a /path in public/ or an https:// URL
-summary: Teaser text       # optional, defaults to the first paragraph; also the meta description
-tags: [php, datastar]
----
-Markdown (GitHub-flavoured: tables, task lists, strikethrough, autolinks).
+## Documentation
 
-![A diagram](diagram.webp)          ← a file next to index.md
-[Download the slides](files/talk.pdf)
-```
-
-**Translated posts.** `index.md` is the post in the default language; a translation sits next to it as
-`index.<code>.md` and shares the folder's images:
-
-```
-2026/09/hello-starlite/
-  index.md          → /blog/hello-starlite        (default language)
-  index.it.md       → /it/blog/hello-starlite
-  cover.png
-```
-
-A translation needs its own `title` (and usually `summary`); `date`, `updated`, `image` and `tags`
-are inherited from `index.md` when omitted. A post that isn't written in a language doesn't exist
-there: it's not listed, searched, counted in tags or put in that language's feed, and its URL is
-a 404 whose language switcher links to the versions that do exist. A post can also exist only in a
-non-default language (just `index.it.md`, with its own `date`).
-
-`index.md` always means the *default* language, so if you change `language` in `config/app.php`,
-rename the files to match (the old `index.it.md` becomes `index.md`, and the old `index.md` becomes
-e.g. `index.en.md`); a mismatch is reported as an error. Files for a language missing from
-`languages` are an error too.
-
-**Publishing a draft:** set its `date`, then move the folder from `drafts/` to its month
-(`git mv content/blog/drafts/my-post content/blog/2026/10/`).
-
-**Post files.** Relative links and images point at files in the post folder (subfolders are fine)
-and are rewritten to `/media/blog/<slug>/…`. Allowed types: jpg, jpeg, png, gif, webp, avif, svg,
-pdf, mp4, webm. Other files in a post folder are never published. In development they're served
-from the post folder by `Starlite\Blog\AssetController`; `bin/console deploy` copies the
-published posts' files to `public/media/blog/`, so in production the web server serves them
-directly. `cache:clear` removes those copies again, so development always sees the originals.
-
-**Mistakes fail loudly**, on the page in debug mode and in `deploy`, so a misfiled post or a
-broken image can't slip through:
-- a Markdown file outside `YYYY/MM/<slug>/index.md` or `drafts/<slug>/index.md`
-- a slug folder that isn't lowercase letters, digits and dashes, or a duplicate slug
-- a `date` that doesn't match the month folder
-- a linked file that's missing, outside the post folder (`..`), or not an allowed type
-- the old `slug:` and `draft:` front matter fields (rename or move the folder instead)
-- `index.<code>.md` for the default language or for a language that isn't configured
-
-Raw HTML in posts is escaped and `javascript:` links are removed, so content files cannot inject
-scripts. Headings get anchor links; external links open in a new tab with `noopener noreferrer`.
-The blog list at `/blog` has live search and tag filters through Datastar
-(`templates/_partials/blog-results.twig`).
-
-**Pagination.** `/blog` shows the newest posts; older ones are at `/blog/page/2`, `/blog/page/3`…
-(`/blog/page/1` redirects to `/blog`, pages past the end are 404). Each page has its own title and
-canonical URL. The pager (`templates/_partials/blog-pager.twig`) is two pagers in one:
-
-- **without JavaScript** (crawlers, no-JS visitors): numbered page links with Newer / Older
-- **with JavaScript:** Datastar hides those links and shows a **Load more** button that appends
-  the next page in place (`_partials/blog-more.twig`). It also works inside search and tag results.
-
-Posts per page: `BLOG_PER_PAGE` in `.env` (default 20, see `config/app.php`). Set it to `1` to see
-pagination with only a few posts.
-
-In production, posts are parsed once into `var/cache/blog.php`. Run `bin/console deploy`
-(or `cache:clear`) after publishing.
-
-## Languages and translations
-
-Languages are configured in `config/app.php`. The default language has no URL prefix; every other
-language is prefixed with its code:
-
-```php
-'language' => 'en',                                        // default: /blog
-'languages' => [
-    'en' => ['name' => 'English', 'locale' => 'en_US'],
-    'it' => ['name' => 'Italiano', 'locale' => 'it_IT'],   // /it/blog
-],
-```
-
-An Italian-only site sets `'language' => 'it'` and lists only `it`. Adding `en` later puts English
-under `/en/…` without changing any existing URL. A URL prefixed with the default language
-redirects to the unprefixed one (`/en/blog` → `/blog` when English is the default).
-
-**The `site` object** (`Starlite\Site`, `$this->app->site` in PHP, `site` in Twig) holds the site's
-name, description and URL, the configured languages and the current one: `site.language` (`it`),
-`site.locale` (`it_IT`), `site.defaultLanguage`, `site.languages`. `<html lang>`, `og:locale` and
-dates (`post.date|format_date('long', locale: site.locale)`) follow the current language.
-
-**Links** stay in the current language: `path('blog')` gives `/it/blog` on Italian pages, and
-`path('blog', {}, 'en')` targets a specific language (`$this->path(...)` in controllers). Datastar
-requests carry the language too.
-
-**Language switcher:** `language_switcher()` in Twig and `$this->app->site->switcher()` in PHP
-return the current page in every language (`code`, `name`, `url`, `active`).
-`templates/_partials/language-switcher.twig` renders it in the navigation, and only when the site
-has more than one language.
-
-**UI texts:** `translations/<code>.php` returns `[text => translation]`. Write the texts in your
-templates' language and wrap them:
-
-```twig
-{{ 'Load more'|t }}
-{{ '{shown} of {total} posts'|t({shown: 20, total: 45}) }}
-{{ t('Blog') }}
-```
-
-In PHP: `$this->t('Post not found.')` in controllers, `$app->t(...)` elsewhere. Messages use ICU
-MessageFormat through `symfony/translation`, so placeholders and plurals work:
-
-```php
-'{minutes} min read' => '{minutes, plural, one {# minuto di lettura} other {# minuti di lettura}}',
-```
-
-A missing translation shows the text itself, never another language. The templates' own
-language file only needs entries whose wording differs, or plural forms (see `translations/en.php`).
-`deploy` compiles the translations into `var/cache/translations`.
-
-**Per language:** blog posts (see *Translated posts*), the blog list, search, tags, the Atom feed
-(`/it/blog/feed.xml`) and `<link rel="alternate" hreflang>` tags in `<head>` (only for versions that
-exist, plus `x-default`). The sitemap lists every language version. Not translated yet: the site
-name and description in `config/app.php`.
-
-## SEO
-
-Every page gets a `<title>`, meta description, canonical link, Open Graph and Twitter card tags,
-and optional JSON-LD blocks. They're all printed once by `{{ seo_tags() }}` in `_layout.twig`.
-
-- **Blog posts** are mapped from front matter automatically (`Starlite\Blog\PostSeo`): title,
-  summary, image, `og:type=article` with published/modified dates and tags, and a `BlogPosting`
-  JSON-LD block. Drafts get `noindex`.
-- **Error pages** get `noindex`.
-- **Site defaults** (name, description, default image, author) live in `config/app.php`
-  under `site`.
-
-Set page metadata from a controller:
-
-```php
-$seo = $this->app->seo->title('About')->description('Who we are.')->image('/images/about.jpg');
-$seo->schema(Schema::organization()->name('Acme')->url($seo->url('/')));   // spatie/schema-org
-```
-
-or from a template, in the `seo` block (it renders before the tags are printed):
-
-```twig
-{% block seo %}{% do seo.title('About').description('Who we are.') %}{% endblock %}
-```
-
-Other setters: `canonical()`, `type()`, `noindex()`, `article()`. `absolute_url('/path')` is
-available in Twig.
-
-All absolute URLs (canonical, `og:url`, `og:image`, sitemap, feed) are built from `APP_URL`,
-never from the request's `Host` header. Pages are publicly cacheable, so a forged `Host` must not
-end up in a cached page. JSON-LD is encoded so a `</script>` in any value can't break out of the tag.
-
-### Feed, sitemap, robots.txt
-
-The framework ships three controllers, wired in `config/routes.php`:
-
-| URL | Controller | Content |
-|---|---|---|
-| `/blog/feed.xml` | `Starlite\Blog\FeedController` | Atom feed of the 20 latest published posts (full HTML content), linked from every page's `<head>` |
-| `/sitemap.xml` | `Starlite\Seo\SitemapController` | Every static GET page (no placeholders, no file extension) plus every published post with its `lastmod` |
-| `/robots.txt` | `Starlite\Seo\RobotsController` | Allows everything and points crawlers at the sitemap |
-
-The feed expects the blog routes to be named `blog` and `blog_post`. Drafts never appear in
-either, even with `APP_DEBUG=1`.
-
-## Datastar (Craft plugin → Starlite)
-
-| Craft Datastar plugin                         | Starlite                                        |
-|-----------------------------------------------|-------------------------------------------------|
-| `{{ datastar.get('_partials/x', {id: 1}) }}`  | same (also `post`, `put`, `patch`, `delete`)    |
-| `{% patchelements %}…{% endpatchelements %}`  | `{% apply patch_elements %}…{% endapply %}`     |
-| `{% patchelements with {mode: 'append'} %}`   | `{% apply patch_elements({mode: 'append'}) %}`  |
-| `{% patchsignals {a: 1} %}`                   | `{% do patch_signals({a: 1}) %}`                |
-| `{% removeelements '#x' %}`                   | `{% do remove_elements('#x') %}`                |
-| `{% executescript %}…{% endexecutescript %}`  | `{% do execute_script('…') %}`                  |
-| `{% location '/x' %}`                         | `{% do location('/x') %}`                       |
-| `signals` variable                            | same                                            |
-| custom controller + `Sse` trait               | controller calling `$this->stream(...)`         |
-| `datastar.runAction()`                        | write a route instead                           |
-
-Templates that queue no events are auto-patched, as in the plugin. The variables passed to
-`datastar.get(...)` are signed (HMAC with `APP_SECRET`) so they cannot be tampered with, but they
-are **readable** in the page source: never pass secrets through them.
-
-The Datastar client (v1.0.2) is vendored in `resources/js/vendor/datastar.js` and bundled by Vite.
-
-## Testing
+The docs live in their own repository, included here as the `docs/` submodule:
 
 ```sh
-npm run build          # once: the app's templates include the Vite manifest
-composer test          # PHPUnit (ddev composer test)
-composer analyse       # PHPStan, level 8
+git submodule update --init                       # if you cloned without --recurse-submodules
+cd docs && npm install && npm run dev             # https://<project>.ddev.site:5174
 ```
 
-Two suites (`phpunit.xml.dist`):
+Update the docs together with the code they describe, then commit the new submodule pointer here.
 
-- **framework** (`lib/tests/`): Starlite itself, against a small fixture project
-  (`lib/tests/data/project`) and fixture content (`lib/tests/data/content`). It travels with `lib/`
-  to every clone. It covers routing, language prefixes and redirects, stateless CSRF, errors,
-  ETag/304, Host-header independence, Datastar partials (SSE), SEO and hreflang, translations, every
-  blog rule and error message, feed/sitemap/robots, asset serving, the console and the deploy steps.
-- **app** (`tests/`): this site's controllers, routes and templates, booted with fixture content
-  (`tests/data/content`): blog pages and pagination, translated and hidden posts, Load more and
-  search partials, the language switcher, the clock action. Add your own app tests here.
+## Roadmap
 
-Tests drive the app through `Kernel::handle(Request::create(...))`, so no web server is needed.
-`Kernel::boot()` accepts config overrides for this (`content_dir`, `cache_dir`, `blog.per_page`…);
-`KernelTestCase` (framework) and `AppTestCase` (app) wrap it, plus helpers for requests, response
-bodies (including SSE streams) and temporary directories. The environment comes from
-`phpunit.xml.dist`, so a developer's `.env` never leaks into the tests.
-
-GitHub Actions (`.github/workflows/ci.yml`) runs the asset build, the tests and PHPStan on every
-push and pull request.
-
-## Deploying
-
-```sh
-npm ci && npm run build      # or pass --assets to deploy
-composer install --no-dev --optimize-autoloader
-php bin/console deploy      # APP_SECRET from .env or the environment
-```
-
-`bin/console deploy` (in DDEV: `ddev console deploy`) runs these steps in order, plus any the app
-adds (see *Building a site on Starlite*; `--list-steps` prints the actual list):
-
-| Step | What it does |
-|---|---|
-| `assets` | only with `--assets`: `npm run build` |
-| `composer` | `composer dump-autoload --optimize --classmap-authoritative` |
-| `cache` | empty `var/cache` |
-| `routes`, `blog`, `translations`, `templates`, `vite` | compile the routes, blog posts (and publish their files), translation catalogues, every Twig template, the Vite manifest |
-| `opcache` | refresh the web server's Opcache, so the new code is used even with `opcache.validate_timestamps=0`. The CLI has its own Opcache, so this always goes through the web server's PHP; how depends on the server, see below |
-
-Options: `--skip=step,step`, `--list-steps`, `--opcache=cachetool|reload|none` (default
-`APP_OPCACHE`, else `cachetool`), `--fcgi`, `--cachetool`, `--reload-cmd`, `--assets`, `--no-dev`,
-`--skip-composer` (same as `--skip=composer`), `--skip-opcache` (same as `--opcache=none`). Set the Opcache variables once per server in its `.env`, then plain
-`php bin/console deploy` does the right thing everywhere.
-
-### Production setups
-
-| Server | `.env` on that server | What deploy does |
-|---|---|---|
-| nginx + PHP-FPM | `APP_OPCACHE=cachetool`<br>`APP_FPM_SOCKET=/run/php/php8.4-fpm.sock` | Invalidates and precompiles every file inside FPM: no slow first requests |
-| Apache + PHP-FPM (`mod_proxy_fcgi`) | same as nginx | same as nginx |
-| nginx/Apache + PHP-FPM, without cachetool | `APP_OPCACHE=reload`<br>`APP_OPCACHE_RELOAD_CMD="sudo systemctl reload php8.4-fpm"` | Graceful FPM reload empties Opcache; files recompile on first use |
-| Apache + mod_php | `APP_OPCACHE=reload`<br>`APP_OPCACHE_RELOAD_CMD="sudo apachectl graceful"` | Graceful Apache restart empties Opcache |
-| Shared hosting | `APP_OPCACHE=none` | Nothing. Hosts normally keep `validate_timestamps=1`, so changes are picked up anyway |
-
-Socket names differ per distribution: check `listen =` in the FPM pool config
-(e.g. `/etc/php/8.4/fpm/pool.d/www.conf`).
-
-**cachetool mode.** Install the same pinned, checksum-verified phar DDEV uses
-(`.ddev/web-build/Dockerfile.cachetool`):
-
-```sh
-curl -fsSL -o /usr/local/bin/cachetool https://github.com/gordalina/cachetool/releases/download/10.0.0/cachetool.phar
-echo "cbe90e7acdde7beafe26b592a753c2b923a99d2033e073dc55e42fba2883bd1d  /usr/local/bin/cachetool" | sha256sum -c -
-chmod 755 /usr/local/bin/cachetool
-```
-
-The deploy user needs access to the FPM socket, which is usually owned by `www-data` with mode
-`0660`: add the deploy user to that group (`sudo usermod -aG www-data deploy`), or run the deploy as
-`www-data`. cachetool is used as a standalone phar rather than a Composer dependency: its Composer
-package still requires Symfony 6, which conflicts with the framework's Symfony 7 components.
-
-**reload mode.** Give the deploy user passwordless sudo for that one command only, e.g. in
-`/etc/sudoers.d/starlite`:
-
-```
-deploy ALL=(root) NOPASSWD: /usr/bin/systemctl reload php8.4-fpm
-```
-
-A graceful reload lets running requests finish, so there is no downtime. The reload command is
-read from the server's own configuration and run as given, so keep `.env` writable only by the
-deploy user.
-
-Note: after `deploy` the autoloader is authoritative, so new classes in `src/` are not found
-until you run `composer dump-autoload` (or deploy again). Do that when you go back to local development.
-
-### Production PHP, nginx and Apache
-
-```ini
-; php.ini: files only change on deploy, so skip the per-request stat calls
-opcache.enable=1
-opcache.validate_timestamps=0
-opcache.memory_consumption=128
-opcache.max_accelerated_files=20000
-opcache.interned_strings_buffer=16
-display_errors=Off
-log_errors=On
-```
-
-```nginx
-root /var/www/starlite/public;
-location /build/ { expires 1y; add_header Cache-Control "public, immutable"; }
-location / { try_files $uri /index.php?$query_string; }
-location ~ \.php$ {
-    include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    fastcgi_param APP_SECRET "…";    # or set it in the FPM pool: env[APP_SECRET] = …
-    fastcgi_buffering off;           # let SSE events stream immediately
-    fastcgi_pass unix:/run/php/php-fpm.sock;
-}
-```
-
-Apache (`a2enmod proxy_fcgi rewrite headers expires`), with PHP-FPM:
-
-```apache
-DocumentRoot /var/www/starlite/public
-<Directory /var/www/starlite/public>
-    AllowOverride None
-    Require all granted
-    FallbackResource /index.php
-</Directory>
-<FilesMatch "\.php$">
-    SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
-</FilesMatch>
-# Let SSE events stream immediately (Apache does not allow comments after a directive)
-<Proxy "fcgi://localhost">
-    ProxySet flushpackets=on
-</Proxy>
-<Location /build/>
-    Header set Cache-Control "public, max-age=31536000, immutable"
-</Location>
-```
-
-With mod_php instead of PHP-FPM, drop the `FilesMatch` and `Proxy` blocks. Either way, set
-`APP_SECRET` in the server's `.env` (or `SetEnv APP_SECRET …` in the vhost, readable only by root).
-
-`var/cache` must be writable by the deploy user and readable by PHP. If PHP-FPM ever finds a
-cache file missing, it rebuilds it on the fly, so it then needs write access too. The same goes
-for Apache with mod_php.
-
-## Security notes
-
-- Absolute URLs come from `APP_URL` only, so a forged `Host` header can't poison cached pages.
-- Secrets only come from the environment or `.env` (outside the `public/` web root, gitignored); `config/app.php` refuses to boot without `APP_SECRET`.
-- Vite only inlines variables prefixed `VITE_PUBLIC_` into the bundle, so server env vars never reach the frontend.
-- `.env`, `.env.*` (except `.env.example`), `var/cache`, `public/build`, `public/media` and `node_modules` are gitignored.
-- Responses send `X-Content-Type-Options`, `Referrer-Policy` and `X-Frame-Options` headers.
-- Non-GET requests from other sites are rejected (stateless origin check, see *CSRF and caching*).
-- Production errors are logged, never shown: visitors get a generic 500 page.
-- There is no HTTP endpoint for deployment tasks; cachetool reaches PHP-FPM through its local socket.
+See [PLAN.md](PLAN.md).

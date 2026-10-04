@@ -55,6 +55,14 @@ a PSR-11 container (`$app->container`, `$this->get()`), named deploy steps (`add
 
 ---
 
+### [x] Documentation site
+VitePress site in the `docs/` submodule (lab909/starlite-framework-docs), versioned under `/1.x/`:
+introduction, getting started, basics, content, features, extending, deployment, testing, security
+and a reference section. Published to GitHub Pages by the docs repository's own workflow.
+Keep it in step with the code: update the docs with each change and commit the submodule pointer.
+
+---
+
 ## 2. Generic features for small apps
 
 ### [ ] Page-specific JavaScript and browser state

@@ -2,6 +2,8 @@
 @plugin "@tailwindcss/typography";
 
 @source "../../templates";
+/* The documentation (git submodule) is a separate site: keep its Markdown out of the class scan. */
+@source not "../../docs";
 
 @theme {
     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
