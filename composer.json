@@ -1,19 +1,23 @@
 {
     "name": "you/starlite",
-    "description": "A Starlite web app.",
+    "description": "Starlite site skeleton: start a new site from here. The framework is the starlite/framework package.",
     "type": "project",
     "repositories": [
         {
             "type": "path",
-            "url": "lib",
+            "url": "packages/*",
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/lab909/starlite-framework"
         }
     ],
     "require": {
         "php": ">=8.4",
-        "starlite/framework": "@dev"
+        "starlite/framework": "^1.0@dev"
     },
     "require-dev": {
         "phpstan/phpstan": "^2",
@@ -26,7 +30,6 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Starlite\\Tests\\": "lib/tests/",
             "App\\Tests\\": "tests/"
         }
     },

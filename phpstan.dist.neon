@@ -1,15 +1,12 @@
-# Static analysis for the framework (lib/), the app and the tests: `composer analyse`.
+# Static analysis for the app and its tests: `composer analyse`. The framework has its own.
 # Level 8 checks types, nullability and array shapes; level 9's strict `mixed` rules mostly flag
 # SPL iterators and console options, so they would add annotations without catching real bugs.
 parameters:
     level: 8
     paths:
-        - lib/src
-        - lib/tests
         - src
         - tests
         - config
     excludePaths:
-        - lib/tests/data/*
         - tests/data/*
     tmpDir: var/phpstan

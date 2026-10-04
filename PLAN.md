@@ -1,10 +1,11 @@
 # Starlite roadmap
 
 Starlite is a starting point, not a full framework: SEO, Twig, Datastar, a Markdown blog, translations
-and a deploy pipeline, with no database and no admin panel. A new site is a **clone** of this
-repository that adds its own routes, controllers, templates and resources.
+and a deploy pipeline, with no database and no admin panel. A new site starts from this **skeleton**
+(lab909/starlite, "Use this template") and installs the framework package (lab909/starlite-framework,
+`starlite/framework`) with Composer; the docs are lab909/starlite-framework-docs. See CONTRIBUTING.md.
 
-This roadmap lists what makes such clones easy to build and keep up to date. The first clone will be
+This roadmap lists what makes such sites easy to build and keep up to date. The first site will be
 **Nocturne**, a calm ambient-sound mixer (claude.ai/design project "Nocturne Mockups"): a blog of
 SEO articles around the app, plus a custom controller for the mixer on the home page. Its review
 surfaced most of the generic needs below; Nocturne's own logic stays in its repository (section 4).
@@ -30,14 +31,14 @@ translated posts, pagination, SEO / hreflang, translations, the deploy command.
 
 Why first: Starlite is meant to be reused; tests are what make changing it safe.
 
-Done: 133 tests (framework suite in `lib/tests/`, app suite in `tests/`), each checked by
+Done: 133 tests (framework suite in the package's `tests/`, app suite in the skeleton's `tests/`), each checked by
 deliberately breaking the behaviour it covers; PHPStan level 8 with no errors (level 9's strict
 `mixed` rules mostly flag SPL iterators and console options); CI in `.github/workflows/ci.yml`.
 See README "Testing".
 
 ### [x] Extension points
-Today a clone can add routes and controllers, but some things can only be changed by editing
-`lib/`, which makes pulling later Starlite improvements into a clone conflict-prone:
+A site could add routes and controllers, but some things could only be changed by editing the
+framework, which would have made later Starlite updates conflict-prone:
 
 - **Console commands**: auto-discover commands in `src/Command/` (today `bin/console` lists them by hand)
 - **`config/bootstrap.php`**: a hook that receives the kernel, to register the app's Twig extensions,
@@ -45,21 +46,27 @@ Today a clone can add routes and controllers, but some things can only be change
 - **Deploy steps**: let the app add steps to `bin/console deploy` (e.g. "build audio" before "refresh
   Opcache"), configured rather than hardcoded
 
-Rule of thumb for a clone: `lib/` is never edited; everything app-specific lives in `src/`, `config/`,
-`templates/`, `resources/`, `content/`, `translations/`.
+Rule of thumb for a site: the framework (`vendor/starlite/framework`) is never edited; everything
+app-specific lives in `src/`, `config/`, `templates/`, `resources/`, `content/`, `translations/`.
 
 Done: `src/Command/` auto-discovery (`AppCommand` with a lazily booted kernel), `config/bootstrap.php`,
 a PSR-11 container (`$app->container`, `$this->get()`), named deploy steps (`addDeployStep()`,
 `--skip`, `--list-steps`), and Starlite's Vite logic moved into a framework plugin
-(`lib/resources/vite/starlite.js`) so `vite.config.js` stays app-only. See README "Building a site on Starlite".
+(`resources/vite/starlite.js` in the package) so `vite.config.js` stays app-only. See README "Building a site on Starlite".
 
 ---
 
+### [x] Separate framework package
+The framework moved out of `lib/` into its own repository (lab909/starlite-framework, with its
+history), installed by sites as a Composer VCS package. Maintainers clone it into the gitignored
+`packages/starlite`, which a path repository prefers over GitHub. Framework updates reach sites as
+`composer update starlite/framework` instead of git merges.
+
 ### [x] Documentation site
-VitePress site in the `docs/` submodule (lab909/starlite-framework-docs), versioned under `/1.x/`:
+VitePress site in its own repository (lab909/starlite-framework-docs), versioned under `/1.x/`:
 introduction, getting started, basics, content, features, extending, deployment, testing, security
 and a reference section. Published to GitHub Pages by the docs repository's own workflow.
-Keep it in step with the code: update the docs with each change and commit the submodule pointer.
+Keep it in step with the code: maintainers clone it into the gitignored `docs/` and update it with each change.
 
 ---
 
@@ -136,7 +143,7 @@ Wired into the same CI as the PHP tests.
 
 ## 4. For the Nocturne repository (not Starlite)
 
-Kept here only as a reminder of what the clone will add on top of Starlite:
+Kept here only as a reminder of what the Nocturne site will add on top of Starlite:
 
 - Spike first: background playback with the screen locked (iOS suspends Web Audio; `<audio loop>`
   leaves gaps) and gapless mixing; Media Session API for lock-screen controls. Test on real phones.
@@ -152,18 +159,18 @@ Kept here only as a reminder of what the clone will add on top of Starlite:
 
 ## Suggested order
 
-1. ~~Tests + PHPStan, then extension points (section 1)~~ — done
+1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
 2. Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2): what an app like
    Nocturne needs on day one
 3. Data collections, content pages, UI building blocks, helpers, PWA, frontend tests
-4. Clone into the Nocturne repository; section 3 items as projects need them
+4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 
 ---
 
-## Housekeeping when cloning
+## Housekeeping when starting a site
 
 - [ ] Replace the Datastar demo page and the sample blog posts
 - [ ] Real site name, description, default share image, author (`config/app.php`)
 - [ ] Languages for the project (`language`, `languages`) and `translations/*.php`
 - [ ] Production server: `.env` (`APP_URL`, `APP_SECRET`, `APP_OPCACHE`…), see README "Production setups"
-- [ ] Keep Starlite as a git remote (`git remote add starlite …`) to pull framework updates into the clone
+- [ ] Commit the site's own `composer.lock` (remove it from `.gitignore`); update the framework with `composer update starlite/framework`

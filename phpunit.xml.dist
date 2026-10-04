@@ -10,11 +10,7 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
          beStrictAboutOutputDuringTests="true">
     <testsuites>
-        <!-- Starlite itself, against a fixture project: travels with lib/ to every clone. -->
-        <testsuite name="framework">
-            <directory>lib/tests</directory>
-        </testsuite>
-        <!-- This site: its controllers, routes and templates, with fixture content. -->
+        <!-- This site: its controllers, routes and templates, with fixture content (tests/data). -->
         <testsuite name="app">
             <directory>tests</directory>
         </testsuite>
@@ -29,7 +25,6 @@
     </php>
     <source>
         <include>
-            <directory>lib/src</directory>
             <directory>src</directory>
         </include>
     </source>

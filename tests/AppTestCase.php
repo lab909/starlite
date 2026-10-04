@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use Starlite\Kernel;
-use Starlite\Tests\KernelTestCase;
+use Starlite\Testing\KernelTestCase;
 
 /**
  * Boots this site (its config/, controllers and templates) with the fixture content in
@@ -19,10 +19,10 @@ abstract class AppTestCase extends KernelTestCase
     /** @param array<string, mixed> $overrides */
     protected function app(bool $debug = false, array $overrides = []): Kernel
     {
-        return $this->kernel($debug, array_replace_recursive([
+        return $this->bootKernel(self::ROOT, $debug, array_replace_recursive([
             'content_dir' => __DIR__ . '/data/content',
             'blog' => ['per_page' => 1],
-        ], $overrides), self::ROOT);
+        ], $overrides));
     }
 
     /** The Datastar URL in the first `@get(...)` on a page whose signed config renders $template. */

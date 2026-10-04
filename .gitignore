@@ -12,3 +12,12 @@
 /.idea
 /var/phpunit/
 /var/phpstan/
+
+# Maintainers only: local clones that replace the published repositories (see CONTRIBUTING.md).
+# packages/* is picked up by Composer's path repository; the empty folder must stay committed.
+/packages/*
+!/packages/.gitkeep
+/docs/
+
+# A new site commits its own lock file: remove this line after creating your site from the skeleton.
+/composer.lock

@@ -26,15 +26,10 @@ jobs:
           node-version: '24'
           cache: npm
 
-      - name: Cache Composer packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/composer
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
-
+      # No lock file in the skeleton: this resolves the latest starlite/framework from GitHub,
+      # so the skeleton is always tested against the current framework.
       - name: Install PHP dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: composer update --no-interaction --no-progress --prefer-dist
 
       - name: Install JS dependencies
         run: npm ci
