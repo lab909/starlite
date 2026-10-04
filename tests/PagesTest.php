@@ -32,4 +32,13 @@ final class PagesTest extends AppTestCase
         self::assertStringContainsString('<span aria-current="true" class="font-semibold">English</span>', $html);
         self::assertMatchesRegularExpression('#<a href="/it/blog" lang="it" hreflang="it"#', $html);
     }
+
+    public function testPageScriptsLoadOnlyWhereTheyAreUsed(): void
+    {
+        $app = $this->app();
+
+        // Built bundles: the manifest maps the entries to hashed files (run `npm run build` first).
+        self::assertMatchesRegularExpression('#<script type="module" src="/build/assets/home-[^"]+\.js"></script>#', self::body($this->request($app, '/')));
+        self::assertStringNotContainsString('/build/assets/home-', self::body($this->request($app, '/blog')));
+    }
 }

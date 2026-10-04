@@ -1,5 +1,8 @@
 {% extends '_layout.twig' %}
 
+{# This page's own bundle, added by the layout after app.js. #}
+{% set page_scripts = ['resources/js/pages/home.js'] %}
+
 {% block content %}
     <h1 class="mb-8 text-3xl font-bold tracking-tight">{{ 'Datastar demo'|t }}</h1>
 
@@ -19,6 +22,30 @@
                 data-on:click="{{ datastar.post('_partials/like', {fruit: 'Mango'}) }}">{{ 'Like mango'|t }}</button>
         <p id="likes">{{ 'Nothing liked yet.'|t }}</p>
         <p data-signals="{liked: false}" data-show="$liked" class="text-emerald-700">{{ 'Thanks for the like!'|t }}</p>
+    </section>
+
+    <section class="mb-10 space-y-3" data-signals="{_tone: {playing: false, volume: 0.5, running: false, supported: true}}">
+        <h2 class="text-lg font-semibold">{{ 'JavaScript module'|t }}</h2>
+        {# Datastar drives the controls; resources/js/pages/home.js plays the tone (see the comments there). #}
+        <p class="text-sm text-stone-600">{{ 'Datastar drives the controls, a JavaScript module plays the sound and remembers the volume.'|t }}</p>
+        <div class="flex flex-wrap items-center gap-4" data-show="$_tone.supported">
+            <button class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700"
+                    data-on:click="$_tone.playing = !$_tone.playing" data-attr:aria-pressed="String($_tone.playing)">
+                <span data-show="!$_tone.playing">{{ 'Play a tone'|t }}</span>
+                <span data-show="$_tone.playing" style="display: none">{{ 'Stop'|t }}</span>
+            </button>
+            <label class="flex items-center gap-2">
+                {{ 'Volume'|t }}
+                <input type="range" min="0" max="1" step="0.01" data-bind:_tone.volume class="accent-stone-900">
+                <span class="w-12 tabular-nums" data-text="Math.round($_tone.volume * 100) + '%'"></span>
+            </label>
+            <span class="flex items-center gap-1.5 text-sm text-stone-600">
+                <span class="size-2 rounded-full bg-stone-300" data-class:bg-emerald-500="$_tone.running"></span>
+                <span data-show="$_tone.running" style="display: none">{{ 'Sound on'|t }}</span>
+                <span data-show="!$_tone.running">{{ 'Sound off'|t }}</span>
+            </span>
+        </div>
+        <p data-show="!$_tone.supported" style="display: none" class="text-stone-600">{{ 'This browser does not support Web Audio.'|t }}</p>
     </section>
 
     <section class="space-y-3">

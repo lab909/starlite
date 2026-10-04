@@ -1,3 +1,4 @@
 import '../css/app.css';
-// Datastar v1.0.2 client, vendored from the official bundle (the npm package is not maintained for v1).
-import './vendor/datastar.js';
+// The Datastar client ships with the framework, matched to its PHP SDK ('datastar' is an alias set
+// by the Starlite Vite plugin). Page bundles in resources/js/pages/ import the same instance.
+import 'datastar';

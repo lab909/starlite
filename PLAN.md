@@ -72,7 +72,7 @@ Keep it in step with the code: maintainers clone it into the gitignored `docs/` 
 
 ## 2. Generic features for small apps
 
-### [ ] Page-specific JavaScript and browser state
+### [x] Page-specific JavaScript and browser state
 - **Several Vite entry points**: one bundle per page or feature (`resources/js/pages/*.js`), included
   through a Twig block, so an app's heavy JS never loads on blog pages (today there's one `app.js`)
 - **Documented pattern "JS module + Datastar signals"**: Datastar drives the UI; a plain JS module
@@ -81,6 +81,14 @@ Keep it in step with the code: maintainers clone it into the gitignored `docs/` 
   ship persistence only in its Pro version, so this needs a small helper (verify first)
 - **Public config for JS**: pass config values to the browser through `<script type="application/json">`
   from an explicit allowlist only, so secrets can't leak into the frontend by accident
+
+Done: every `resources/js/pages/*.js` is an entry point (no config change), added by a page with
+`{% set page_scripts = [...] %}`; the Datastar client moved into the framework (alias `'datastar'`,
+one shared instance across bundles); framework helpers `ready`, `persist()` and `publicConfig()`
+(alias `'starlite'`); `public` allowlist in `config/app.php` printed by `{{ public_config() }}`,
+refused if a value contains APP_SECRET. Verified: Datastar v1.0.2 has no persistence, and modules
+run before Datastar applies `data-signals` (hence `ready`). Demo: a Web Audio tone on the home page.
+Docs: "JavaScript & Datastar".
 
 ### [ ] Dark / light / system theme
 Follow `prefers-color-scheme` with a user override, applied before first paint by a tiny inline
@@ -99,8 +107,8 @@ Accessible Twig macros wired to Datastar: dialog / bottom sheet (native `<dialog
 `prefers-reduced-motion` handling.
 
 ### [ ] Content Security Policy, cache-friendly
-The main missing security header. Use **hashes** of the few inline scripts (theme script, JSON
-config), computed at build time, not per-request nonces: a nonce would make every response
+The main missing security header. Use **hashes** of the few inline scripts (the theme script;
+the JSON config is a data block, which CSP doesn't apply to), computed at build time, not per-request nonces: a nonce would make every response
 different and break ETags, public caching and the static export. Datastar needs `'unsafe-eval'`;
 the rest stays locked down (`default-src 'self'`, `object-src 'none'`, `base-uri 'self'`,
 `frame-ancestors 'self'`), with `media-src` / `worker-src` / CDN hosts from config.
@@ -163,7 +171,7 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 ## Suggested order
 
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
-2. Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2): what an app like
+2. ~~Page-specific JS + Datastar pattern~~, theme, fonts/icons, CSP (section 2): what an app like
    Nocturne needs on day one
 3. Data collections, content pages, UI building blocks, helpers, PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them

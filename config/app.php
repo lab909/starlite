@@ -26,6 +26,11 @@ return [
         // Posts per page on /blog. Set BLOG_PER_PAGE=1 in .env to try pagination with only a few posts.
         'per_page' => max(1, (int) (getenv('BLOG_PER_PAGE') ?: 20)),
     ],
+    // Values page scripts may read (`{{ public_config() }}` in the layout, `publicConfig()` in JS). This is
+    // an allowlist: nothing else from this file reaches the browser. Everything here is public, so never
+    // put secrets or private URLs in it (a value containing APP_SECRET is refused).
+    // E.g. 'public' => ['media_url' => getenv('MEDIA_URL') ?: '/media'],
+    'public' => [],
     // Site-wide SEO defaults; pages override them through `seo` (see README, "SEO").
     'site' => [
         'name' => 'Starlite',

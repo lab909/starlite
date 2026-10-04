@@ -7,7 +7,10 @@
     {% block seo %}{% endblock %}
     {{ seo_tags() }}
     <link rel="alternate" type="application/atom+xml" title="{{ site.name }} — {{ 'Blog'|t }}" href="{{ path('blog_feed') }}">
-    {{ vite('resources/js/app.js') }}
+    {# Values from config/app.php `public` for page scripts (only those: it's an allowlist). #}
+    {{ public_config() }}
+    {# Pages add their own bundles with {% set page_scripts = ['resources/js/pages/<name>.js'] %}. #}
+    {{ vite('resources/js/app.js', page_scripts ?? []) }}
 </head>
 <body class="min-h-screen bg-stone-50 text-stone-800 antialiased">
     <header class="border-b border-stone-200 bg-white">
