@@ -31,6 +31,15 @@ return [
     // put secrets or private URLs in it (a value containing APP_SECRET is refused).
     // E.g. 'public' => ['media_url' => getenv('MEDIA_URL') ?: '/media'],
     'public' => [],
+    // Content Security Policy: browsers only load scripts, styles, fonts, images, frames… from your own
+    // site, plus the hosts listed here per directive. Add what a feature needs, e.g. a video player:
+    //   'frame-src' => ['https://www.youtube-nocookie.com'], 'media-src' => ['https://cdn.example.com'],
+    // report_only: browsers report violations in the console without blocking (to try a change first).
+    'csp' => [
+        'enabled' => true,
+        'report_only' => false,
+        'sources' => [],
+    ],
     // Site-wide SEO defaults; pages override them through `seo` (see README, "SEO").
     'site' => [
         'name' => 'Starlite',

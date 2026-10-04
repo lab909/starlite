@@ -119,17 +119,31 @@ Accessible Twig macros wired to Datastar: dialog / bottom sheet (native `<dialog
 (arrows, Page Up/Down, Home/End, 44 px hit area). Layout basics: skip link, visible focus styles,
 `prefers-reduced-motion` handling.
 
-### [ ] Content Security Policy, cache-friendly
-The main missing security header. Use **hashes** of the few inline scripts (the theme script, `Theme::hash()`;
-the JSON config is a data block, which CSP doesn't apply to), computed at build time, not per-request nonces: a nonce would make every response
-different and break ETags, public caching and the static export. Datastar needs `'unsafe-eval'`;
-the rest stays locked down (`default-src 'self'`, `object-src 'none'`, `base-uri 'self'`,
-`frame-ancestors 'self'`, `img-src 'self' data:` for the icon masks; verify in a browser), with `media-src` / `worker-src` / CDN hosts from config.
+### [x] Content Security Policy, cache-friendly
+The main missing security header. Use **hashes** of the few inline scripts instead of per-request
+nonces: a nonce would make every response different and break ETags, public caching and the static
+export. Datastar needs `'unsafe-eval'`; the rest stays locked down, with extra hosts from config.
+
+Done: `Starlite\Csp` (`$app->csp`) sends a strict policy on HTML responses: `default-src 'self'`,
+`script-src 'self' 'unsafe-eval'` + the theme script's hash, `img-src 'self' data:` (icon masks),
+`style-src-attr 'unsafe-inline'` (data-show's `display: none`), `object-src 'none'`, `base-uri`,
+`form-action`, `frame-ancestors 'self'`. Extra sources per directive in `config/app.php`
+(`csp.sources`) or `$app->csp->allow()`; `report_only` mode; `allowScript()` for `execute_script()`
+(removed from the clock demo); the Vite dev server is allowed while it runs. Verified in Chromium:
+every demo and page works with no violations, in production and with the dev server; without `data:`
+the icons break and without `'unsafe-eval'` Datastar does. Docs: Security → Content Security Policy.
 
 ### [ ] Data collections
 Structured content beyond blog posts (catalogues, FAQs, team, products…): `content/<collection>/`
 with YAML or Markdown front matter, compiled into `var/cache`, validated loudly, translatable like
 posts, usable from Twig and exportable as JSON for JS modules.
+
+### [ ] Media embeds in posts
+YouTube / Vimeo (and similar) in Markdown, without allowing raw HTML (posts escape it, by design):
+an embed syntax the Markdown parser turns into markup the framework controls (e.g. a line with only
+a video URL, or `::youtube[id]`). **Click-to-load** for privacy: a self-hosted thumbnail and play
+button, and nothing reaches the video host until the visitor clicks (a normal iframe contacts it on
+page load, even on youtube-nocookie.com). The player host goes in `csp.sources` (`frame-src`).
 
 ### [ ] Markdown content pages
 `content/pages/<slug>/index.md` (+ `index.<code>.md`, images) for About, Privacy, Imprint, credits…,
@@ -184,9 +198,9 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 ## Suggested order
 
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
-2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons~~, CSP (section 2): what an app like
+2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2)~~: what an app like
    Nocturne needs on day one
-3. Data collections, content pages, UI building blocks, helpers, PWA, frontend tests
+3. Data collections, content pages, media embeds, UI building blocks, helpers, PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 
 ---

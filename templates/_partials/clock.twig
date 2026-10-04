@@ -2,4 +2,6 @@
     <p id="clock">{{ 'Server time: {time}'|t({time: now}) }}</p>
 {% endapply %}
 
-{% do execute_script("console.log('Clock updated')") %}
+{# execute_script() would run a script here, but the Content Security Policy blocks inline scripts it
+   doesn't know: allow each one with $app->csp->allowScript('…') in config/bootstrap.php. Patching
+   elements (above) and signals needs nothing in the policy, so prefer those. #}

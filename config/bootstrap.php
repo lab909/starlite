@@ -16,6 +16,11 @@ return static function (Kernel $app): void {
     // $app->twig->addExtension(new App\Twig\AppExtension());
     // $app->twig->addGlobal('support_email', 'help@example.com');
 
+    // Content Security Policy: hosts a feature needs (also in config/app.php `csp.sources`), and inline
+    // scripts sent with Datastar's execute_script(), by their exact code.
+    // $app->csp->allow('script-src', 'https://plausible.io')->allow('connect-src', 'https://plausible.io');
+    // $app->csp->allowScript("console.log('Clock updated')");
+
     // Deploy: extra build steps, by default just before Opcache is refreshed
     // (`bin/console deploy --list-steps` shows the order).
     // $app->addDeployStep('audio', 'app:build-audio', 'Encode the sound files', before: 'opcache');
