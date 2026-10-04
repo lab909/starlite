@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
+use Starlite\Theme;
+
 final class PagesTest extends AppTestCase
 {
     public function testHomePageInBothLanguages(): void
@@ -40,5 +42,17 @@ final class PagesTest extends AppTestCase
         // Built bundles: the manifest maps the entries to hashed files (run `npm run build` first).
         self::assertMatchesRegularExpression('#<script type="module" src="/build/assets/home-[^"]+\.js"></script>#', self::body($this->request($app, '/')));
         self::assertStringNotContainsString('/build/assets/home-', self::body($this->request($app, '/blog')));
+    }
+
+    public function testThemeIsAppliedBeforeAnythingElseInTheHead(): void
+    {
+        $html = self::body($this->request($this->app(), '/'));
+
+        // First in <head> after the meta tags, before any stylesheet: no flash of the wrong theme.
+        self::assertMatchesRegularExpression('#<meta name="viewport"[^>]*>\s*<script>\(function\(\)\{var t;try\{t=JSON\.parse\(localStorage#', $html);
+        self::assertLessThan(strpos($html, 'rel="stylesheet"') ?: strpos($html, '<script type="module"'), strpos($html, Theme::SCRIPT));
+        foreach (['light', 'dark', 'system'] as $theme) {
+            self::assertStringContainsString('<input type="radio" name="theme" value="' . $theme . '" class="sr-only" data-bind:_theme>', $html);
+        }
     }
 }

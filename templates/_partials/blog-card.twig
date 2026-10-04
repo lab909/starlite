@@ -1,9 +1,9 @@
 <article>
-    <p class="text-sm text-stone-500">
+    <p class="text-sm text-subtle">
         <time datetime="{{ post.date }}">{{ post.date|format_date('long', locale: site.locale) }}</time>
         · {{ '{minutes} min read'|t({minutes: post.reading_minutes}) }}
-        {% if post.draft %}<span class="ml-1 rounded bg-amber-100 px-1.5 text-amber-800">{{ 'draft'|t }}</span>{% endif %}
+        {% if post.draft %}<span class="ml-1 rounded bg-warning-soft px-1.5 text-warning">{{ 'draft'|t }}</span>{% endif %}
     </p>
     <h2 class="text-xl font-semibold"><a href="{{ path('blog_post', {slug: post.slug}) }}" class="hover:underline">{{ post.title }}</a></h2>
-    <p class="mt-1 text-stone-600">{{ post.summary }}</p>
+    <p class="mt-1 text-muted">{{ post.summary }}</p>
 </article>

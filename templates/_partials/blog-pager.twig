@@ -10,10 +10,10 @@
         <div style="display: none" data-show="true" class="flex items-center gap-4">
             <button data-on:click="$page = {{ result.page + 1 }}; {{ datastar.get('_partials/blog-more') }}"
                     data-indicator:loading data-attr:disabled="$loading"
-                    class="rounded-md bg-stone-900 px-4 py-2 text-white hover:bg-stone-700 disabled:opacity-50">
+                    class="rounded-md bg-primary px-4 py-2 text-on-primary hover:bg-primary-hover disabled:opacity-50">
                 <span data-show="!$loading">{{ 'Load more'|t }}</span><span style="display: none" data-show="$loading">{{ 'Loading…'|t }}</span>
             </button>
-            <span class="text-stone-500">{{ '{shown} of {total} posts'|t({shown: shown, total: result.total}) }}</span>
+            <span class="text-subtle">{{ '{shown} of {total} posts'|t({shown: shown, total: result.total}) }}</span>
         </div>
     {% endif %}
 
@@ -26,13 +26,13 @@
                 {% if n == 1 or n == result.pages or (n - result.page)|abs <= 2 %}
                     <li>
                         {% if n == result.page %}
-                            <span aria-current="page" class="rounded bg-stone-900 px-2 py-1 text-white">{{ n }}</span>
+                            <span aria-current="page" class="rounded bg-primary px-2 py-1 text-on-primary">{{ n }}</span>
                         {% else %}
-                            <a href="{{ n == 1 ? path('blog') : path('blog_page', {page: n}) }}" class="rounded px-2 py-1 hover:bg-stone-200">{{ n }}</a>
+                            <a href="{{ n == 1 ? path('blog') : path('blog_page', {page: n}) }}" class="rounded px-2 py-1 hover:bg-chip">{{ n }}</a>
                         {% endif %}
                     </li>
                 {% elseif n == 2 or n == result.pages - 1 %}
-                    <li class="text-stone-400">…</li>
+                    <li class="text-subtle">…</li>
                 {% endif %}
             {% endfor %}
             {% if result.has_more %}

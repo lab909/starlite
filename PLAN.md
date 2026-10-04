@@ -90,10 +90,16 @@ refused if a value contains APP_SECRET. Verified: Datastar v1.0.2 has no persist
 run before Datastar applies `data-signals` (hence `ready`). Demo: a Web Audio tone on the home page.
 Docs: "JavaScript & Datastar".
 
-### [ ] Dark / light / system theme
+### [x] Dark / light / system theme
 Follow `prefers-color-scheme` with a user override, applied before first paint by a tiny inline
 script (no flash). Colour tokens in Tailwind's `@theme`; `dark:` variant driven by a `data-theme`
 attribute.
+
+Done: `{{ theme_script() }}` first in `<head>` (framework, `Starlite\Theme`, with `Theme::hash()` for
+the CSP); `theme()` in the 'starlite' module (saves the `_theme` signal, follows system changes);
+colour tokens with `light-dark()` in `resources/css/app.css`, so the system setting works even without
+JavaScript; a radio-group toggle in the header; templates converted to tokens. Also: `cache:clear`
+now rebuilds the normal Composer autoloader after a deploy. Docs: "Dark & light theme".
 
 ### [ ] Self-hosted fonts and icons
 Fonts bundled through Vite (e.g. `@fontsource`) instead of Google Fonts: no third-party requests
@@ -107,7 +113,7 @@ Accessible Twig macros wired to Datastar: dialog / bottom sheet (native `<dialog
 `prefers-reduced-motion` handling.
 
 ### [ ] Content Security Policy, cache-friendly
-The main missing security header. Use **hashes** of the few inline scripts (the theme script;
+The main missing security header. Use **hashes** of the few inline scripts (the theme script, `Theme::hash()`;
 the JSON config is a data block, which CSP doesn't apply to), computed at build time, not per-request nonces: a nonce would make every response
 different and break ETags, public caching and the static export. Datastar needs `'unsafe-eval'`;
 the rest stays locked down (`default-src 'self'`, `object-src 'none'`, `base-uri 'self'`,
@@ -171,7 +177,7 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 ## Suggested order
 
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
-2. ~~Page-specific JS + Datastar pattern~~, theme, fonts/icons, CSP (section 2): what an app like
+2. ~~Page-specific JS + Datastar pattern, theme~~, fonts/icons, CSP (section 2): what an app like
    Nocturne needs on day one
 3. Data collections, content pages, UI building blocks, helpers, PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them

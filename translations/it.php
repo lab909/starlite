@@ -5,6 +5,10 @@ return [
     // Navigation and layout
     'Blog' => 'Blog',
     'Language' => 'Lingua',
+    'Theme' => 'Tema',
+    'Light theme' => 'Tema chiaro',
+    'Dark theme' => 'Tema scuro',
+    'System theme' => 'Tema di sistema',
     '← Home' => '← Home',
 
     // Blog

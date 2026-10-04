@@ -2,11 +2,62 @@
 @plugin "@tailwindcss/typography";
 
 @source "../../templates";
-/* The documentation (git submodule) is a separate site: keep its Markdown out of the class scan. */
+/* The documentation (maintainers' clone) is a separate site: keep its Markdown out of the class scan. */
 @source not "../../docs";
 
+/*
+ * Theme: light / dark / system.
+ *
+ * Templates use the colour tokens below (bg-page, text-muted, border-line, bg-primary…), not fixed
+ * colours, so the whole site switches together and a redesign means editing this block. Each token
+ * holds both values in light-dark(); `color-scheme` picks one:
+ * - by default it follows the system, so colours are right even without JavaScript
+ * - <html data-theme="light|dark">, set by {{ theme_script() }} and theme(), forces one
+ * Form controls and scrollbars follow `color-scheme` too.
+ */
 @theme {
     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    --color-page: light-dark(var(--color-stone-50), var(--color-stone-950));         /* page background */
+    --color-surface: light-dark(var(--color-white), var(--color-stone-900));         /* header, inputs */
+    --color-ink: light-dark(var(--color-stone-800), var(--color-stone-200));         /* body text */
+    --color-strong: light-dark(var(--color-stone-900), var(--color-stone-50));       /* emphasis, hovers */
+    --color-muted: light-dark(var(--color-stone-600), var(--color-stone-400));       /* secondary text */
+    --color-subtle: light-dark(var(--color-stone-500), var(--color-stone-500));      /* meta text */
+    --color-line: light-dark(var(--color-stone-200), var(--color-stone-800));        /* dividers */
+    --color-line-strong: light-dark(var(--color-stone-300), var(--color-stone-700)); /* control borders */
+    --color-chip: light-dark(var(--color-stone-200), var(--color-stone-800));        /* tags, hovers */
+    --color-primary: light-dark(var(--color-stone-900), var(--color-stone-100));     /* buttons */
+    --color-primary-hover: light-dark(var(--color-stone-700), var(--color-stone-300));
+    --color-on-primary: light-dark(var(--color-white), var(--color-stone-900));      /* text on buttons */
+    --color-success: light-dark(var(--color-emerald-700), var(--color-emerald-400));
+    --color-warning: light-dark(var(--color-amber-800), var(--color-amber-200));
+    --color-warning-soft: light-dark(var(--color-amber-100), var(--color-amber-950));
+}
+
+:root {
+    color-scheme: light dark;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* `dark:` follows the chosen theme; without JavaScript (no data-theme), the system setting. */
+@custom-variant dark {
+    &:where([data-theme="dark"], [data-theme="dark"] *) {
+        @slot;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+            @slot;
+        }
+    }
 }
 
 .heading-permalink {
