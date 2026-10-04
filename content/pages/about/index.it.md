@@ -1,5 +1,6 @@
 ---
 title: Chi siamo
+slug: chi-siamo
 summary: Cos'è Starlite e a chi è rivolto.
 ---
 Starlite è un punto di partenza per siti di contenuti che hanno bisogno di un po' di interattività:

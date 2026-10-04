@@ -1,5 +1,6 @@
 ---
 title: Ciao, Starlite
+slug: ciao-starlite
 summary: Un micro framework senza database che serve pagine dinamiche alla velocità di un sito statico.
 ---
 

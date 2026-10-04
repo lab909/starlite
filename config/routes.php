@@ -37,4 +37,6 @@ return static function (Kernel $app): void {
     // every other route wins, wherever it's added. `deploy` reports pages that a route hides.
     $app->get(Pages::ASSET_URL . '/{file}', PageAssetController::class, 'page_asset', ['file' => '.+']);
     $app->get('/{path}', [PageController::class, 'show'], 'page', ['path' => Pages::PATH], priority: -1);
+    // Link to a page by its folder path, `path('page', {path: 'about'})`: Starlite writes each
+    // language's URL, translated slugs included.
 };

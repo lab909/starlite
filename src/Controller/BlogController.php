@@ -43,10 +43,33 @@ final class BlogController extends Controller
         return $this->render('blog/index.twig', ['result' => $result]);
     }
 
+    /** @param string $slug the URL segment in the current language: `slug:` in a translation can change it */
     public function show(string $slug): string|Response
     {
-        // The switcher and hreflang offer only the languages this post is written in;
-        // the others get their blog's front page.
+        $post = $this->app->posts()->where('uri', $slug)->one();
+        if ($post === null) {
+            // Reached by its folder name, but this language has a translated slug: it moved.
+            $moved = $this->app->posts()->slug($slug)->one();
+            if ($moved !== null) {
+                return new RedirectResponse($this->path('blog_post', ['slug' => $moved['slug']]), Response::HTTP_MOVED_PERMANENTLY);
+            }
+            // Not written in this language (or doesn't exist): 404, whose switcher links to the existing versions.
+            $this->setPostAlternates($slug);
+
+            return $this->notFound($this->t('Post not found.'));
+        }
+        $this->setPostAlternates($post['slug']);
+        PostSeo::apply($this->app->seo, $post);
+
+        return $this->render('blog/post.twig', ['post' => $post]);
+    }
+
+    /**
+     * The switcher and hreflang offer only the languages a post is written in, each at its own URL
+     * (path() writes it from the folder name); the others get their blog's front page.
+     */
+    private function setPostAlternates(string $slug): void
+    {
         $alternates = $fallbacks = [];
         $translations = $this->app->blog->translations($slug);
         foreach (array_keys($this->app->site->languages) as $language) {
@@ -57,14 +80,5 @@ final class BlogController extends Controller
             }
         }
         $this->app->site->setAlternates($alternates, $fallbacks);
-
-        // Not written in this language (or doesn't exist): 404, whose switcher still links to the existing versions.
-        $post = $this->app->posts()->slug($slug)->one();
-        if ($post === null) {
-            return $this->notFound($this->t('Post not found.'));
-        }
-        PostSeo::apply($this->app->seo, $post);
-
-        return $this->render('blog/post.twig', ['post' => $post]);
     }
 }

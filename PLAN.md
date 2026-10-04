@@ -155,6 +155,19 @@ inheriting omitted fields. Compiled into `var/cache/collections.php` (deploy ste
 files and folders, orphan translations, relative links. Demo: the FAQ on the home page; the app's
 tests compile the real content/. Docs: Content → Data collections.
 
+### [x] Translated slugs
+A translation can set its own URL segment with `slug:` in its front matter: `content/pages/about/
+index.it.md` with `slug: chi-siamo` is `/it/chi-siamo`, nested pages combine their parents'
+translated slugs (`/it/chi-siamo/riconoscimenti`), posts likewise (`/it/blog/ciao-starlite`). The
+folder name stays the identity (`path` / `slug`), used by queries and by `path('page', {path: 'about'})`,
+which writes the right URL for each language; items get a `uri` field with their URL in that
+language. The untranslated URL redirects (301) to the translated one; duplicate URLs in a language
+fail loudly, and `deploy` checks translated URLs against the routes too.
+
+Done as described, for pages and posts. `Kernel::path()` localizes the `page` and `blog_post` routes;
+the skeleton's controllers look items up by `uri` and redirect folder paths. Demo: /it/chi-siamo,
+/it/chi-siamo/riconoscimenti, /it/blog/ciao-starlite.
+
 ### [ ] Media embeds in posts
 YouTube / Vimeo (and similar) in Markdown, without allowing raw HTML (posts escape it, by design):
 an embed syntax the Markdown parser turns into markup the framework controls (e.g. a line with only
@@ -228,6 +241,8 @@ Wired into the same CI as the PHP tests.
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
 - [ ] **Responsive images**: resized WebP/AVIF variants of post images with `srcset`, built at deploy time
+- [ ] **Translated route segments** (`/it/articoli` instead of `/it/blog`): Symfony's localized
+      routes, one path per language, defined in `config/routes.php`.
 - [ ] **A second blog-like section** (e.g. `content/news/` beside `content/blog/`): another instance
       of the blog machinery, queried as `posts('news')`. Only when a real site needs it.
 

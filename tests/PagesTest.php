@@ -86,9 +86,15 @@ final class PagesTest extends AppTestCase
         self::assertStringContainsString('href="/about/credits"', $about, 'pages/about.twig lists the child pages');
         self::assertMatchesRegularExpression('#<footer.*href="/about".*href="/privacy".*</footer>#s', $about, 'menu in `order`');
 
-        $credits = self::body($this->request($app, '/it/about/credits'));
+        // Italian slugs (slug: in index.it.md): its own URLs, and the folder paths redirect there.
+        $credits = self::body($this->request($app, '/it/chi-siamo/riconoscimenti'));
         self::assertStringContainsString('<h1 class="mb-8 text-4xl font-bold tracking-tight">Riconoscimenti</h1>', $credits);
-        self::assertMatchesRegularExpression('#<a href="/it/about"[^>]*>← Chi siamo</a>#', $credits, 'link to the parent page');
+        self::assertMatchesRegularExpression('#<a href="/it/chi-siamo"[^>]*>← Chi siamo</a>#', $credits, 'link to the parent page');
+        self::assertStringContainsString('<link rel="alternate" hreflang="en" href="https://example.test/about/credits">', $credits);
+        $moved = $this->request($app, '/it/about/credits');
+        self::assertSame([301, '/it/chi-siamo/riconoscimenti'], [$moved->getStatusCode(), $moved->headers->get('Location')]);
+        $post = $this->request($app, '/it/blog/hello-starlite');
+        self::assertSame([301, '/it/blog/ciao-starlite'], [$post->getStatusCode(), $post->headers->get('Location')]);
 
         $missing = $this->request($app, '/nope');
         self::assertSame(404, $missing->getStatusCode());

@@ -1,5 +1,6 @@
 ---
 title: Riconoscimenti
+slug: riconoscimenti
 summary: I progetti open source su cui si basa Starlite.
 ---
 Starlite tiene insieme librerie collaudate: i componenti [Symfony](https://symfony.com),
