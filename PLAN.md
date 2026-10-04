@@ -116,6 +116,9 @@ reusing the blog machinery (front matter, assets, translations, SEO, sitemap).
 
 ### [ ] Small helpers
 - [x] `$this->json($data)` in controllers for app data endpoints
+- `KernelTestCase` skips Vite when there's no manifest (or fails with a clear message): today a
+  new site running `composer test` before the first `npm run build` gets 11 failures that only say
+  "Something went wrong." (CI is fine because it builds first)
 - `MEDIA_URL` setting so post images and other large files can be served from a CDN, with long cache
   headers by default
 
