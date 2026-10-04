@@ -53,6 +53,7 @@ return [
     'Sound on' => 'Audio attivo',
     'Sound off' => 'Audio spento',
     'This browser does not support Web Audio.' => 'Questo browser non supporta Web Audio.',
+    'Data collection' => 'Raccolta di dati',
     'Custom route' => 'Route personalizzata',
     'What time is it?' => 'Che ore sono?',
     'Server time: {time}' => 'Ora del server: {time}',

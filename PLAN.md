@@ -133,10 +133,19 @@ Done: `Starlite\Csp` (`$app->csp`) sends a strict policy on HTML responses: `def
 every demo and page works with no violations, in production and with the dev server; without `data:`
 the icons break and without `'unsafe-eval'` Datastar does. Docs: Security → Content Security Policy.
 
-### [ ] Data collections
+### [x] Data collections
 Structured content beyond blog posts (catalogues, FAQs, team, products…): `content/<collection>/`
 with YAML or Markdown front matter, compiled into `var/cache`, validated loudly, translatable like
 posts, usable from Twig and exportable as JSON for JS modules.
+
+Done: `config/collections.php` defines each collection's typed fields (string, int, float, bool, date,
+url, markdown, list, array; `?` optional), `sort`, `fallback` and a `json` allowlist; items are
+`content/<name>/<slug>.md` (front matter + body → `html`) or `.yaml`, translations `<slug>.<lang>.md`
+inheriting omitted fields. Compiled into `var/cache/collections.php` (deploy step `collections`);
+`collections.faq` in Twig with `all`/`find`/`where`, `$app->collections` in PHP; JSON at
+`/data/<name>.json` (per language, ETag). Loud errors for unknown/missing/mistyped fields, stray
+files and folders, orphan translations, relative links. Demo: the FAQ on the home page; the app's
+tests compile the real content/. Docs: Content → Data collections.
 
 ### [ ] Media embeds in posts
 YouTube / Vimeo (and similar) in Markdown, without allowing raw HTML (posts escape it, by design):

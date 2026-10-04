@@ -63,4 +63,15 @@ final class PagesTest extends AppTestCase
         self::assertMatchesRegularExpression('#<link rel="preload" href="/build/assets/inter-latin-wght-normal-[^"]+\.woff2" as="font" type="font/woff2" crossorigin>#', $html);
         self::assertStringNotContainsString('fonts.googleapis.com', $html);
     }
+
+    public function testTheSitesOwnContentIsValid(): void
+    {
+        // The real content/, not the fixtures: a broken post or collection file fails here, in CI.
+        $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
+        self::assertNotEmpty($app->blog->all());
+        self::assertNotEmpty($app->collections->warmup());
+
+        self::assertMatchesRegularExpression('#What is Starlite\?.*Where does the content live\?.*How fast is it\?#s', self::body($this->request($app, '/')));
+        self::assertMatchesRegularExpression('#Che cos&\#039;è Starlite\?.*Dove si trovano i contenuti\?.*Quanto è veloce\?#s', self::body($this->request($app, '/it')));
+    }
 }
