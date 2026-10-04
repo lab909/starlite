@@ -12,6 +12,7 @@
 /.idea
 /var/phpunit/
 /var/phpstan/
+.ddev/docker-compose.myddev.local.yaml
 
 # Maintainers only: local clones that replace the published repositories (see CONTRIBUTING.md).
 # packages/* is picked up by Composer's path repository; the empty folder must stay committed.
