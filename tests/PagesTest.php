@@ -68,7 +68,7 @@ final class PagesTest extends AppTestCase
     {
         // The real content/, not the fixtures: a broken post or collection file fails here, in CI.
         $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
-        self::assertNotEmpty($app->blog->all());
+        self::assertTrue($app->posts()->exists());
         self::assertNotEmpty($app->collections->warmup());
 
         self::assertMatchesRegularExpression('#What is Starlite\?.*Where does the content live\?.*How fast is it\?#s', self::body($this->request($app, '/')));

@@ -50,9 +50,9 @@
 
     <section class="mb-10 space-y-3">
         <h2 class="text-lg font-semibold">{{ 'Data collection'|t }}</h2>
-        {# content/faq/*.md, defined in config/collections.php; in the page's language, in `order`. #}
+        {# content/faq/*.md, defined in config/collections.php: queried here, in the page's language, sorted by `order`. #}
         <div class="divide-y divide-line rounded-md border border-line bg-surface">
-            {% for item in collections.faq %}
+            {% for item in collection('faq') %}
                 <details class="group px-4 py-3" lang="{{ item.language }}">
                     <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                         {{ item.question }}

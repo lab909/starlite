@@ -1,7 +1,7 @@
-{# One page of posts plus the pager. Needs `result` from blog.page(); `filtered` for search results. #}
+{# One page of posts plus the pager. Needs `result` from posts()…paginate(); `filtered` for search results. #}
 <div id="blog-results">
     <div id="blog-posts" class="space-y-8">
-        {% for post in result.posts %}
+        {% for post in result.items %}
             {% include '_partials/blog-card.twig' %}
         {% else %}
             <p class="text-subtle">{{ 'No posts found.'|t }}</p>

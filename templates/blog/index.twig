@@ -13,7 +13,7 @@
             <button data-on:click="$tag = ''; $page = 1; {{ datastar.get('_partials/blog-results') }}"
                     data-class:bg-primary="$tag === ''" data-class:text-on-primary="$tag === ''"
                     class="rounded-full border border-line-strong px-3 py-1">{{ 'all'|t }}</button>
-            {% for tag, count in blog.tags %}
+            {% for tag, count in posts().countBy('tags') %}
                 <button data-on:click="$tag = {{ tag|json_encode }}; $page = 1; {{ datastar.get('_partials/blog-results') }}"
                         data-class:bg-primary="$tag === {{ tag|json_encode }}" data-class:text-on-primary="$tag === {{ tag|json_encode }}"
                         class="rounded-full border border-line-strong px-3 py-1">{{ tag }} <span class="opacity-60">{{ count }}</span></button>

@@ -1,4 +1,4 @@
 {# Datastar: search / tag filter. Page 1 of the matches; the whole output is auto-patched by id. #}
 {% set q = signals.q ?? '' %}
 {% set tag = signals.tag ?? '' %}
-{% include '_partials/blog-list.twig' with {result: blog.page(1, q, tag), filtered: q != '' or tag != ''} %}
+{% include '_partials/blog-list.twig' with {result: posts().search(q).tag(tag).paginate(1), filtered: q != '' or tag != ''} %}

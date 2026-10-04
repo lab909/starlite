@@ -3,8 +3,8 @@
 // Data collections: structured content beyond blog posts (FAQs, team, products, a catalogue…).
 // Each one lives in content/<name>/ as <slug>.md (fields in the front matter, optional Markdown body)
 // or <slug>.yaml (fields only); translations are <slug>.<language>.md and keep the fields they omit.
-// In Twig: {% for item in collections.faq %}…{% endfor %}, collections.faq.find('slug');
-// in PHP: $this->app->collections['faq']. Files are checked against the fields below: a typo,
+// In Twig: {% for item in collection('faq') %}…{% endfor %}, collection('faq').slug('x').one();
+// in PHP: $this->app->collection('faq')->all(). Files are checked against the fields below: a typo,
 // a wrong type or a missing field stops with the file name.
 //
 // Field types (a leading ? makes a field optional): string, int, float, bool, date (YYYY-MM-DD),

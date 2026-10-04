@@ -4,7 +4,7 @@
     `filtered` is true for search/tag results, which have no page URLs of their own.
 #}
 {% set filtered = filtered ?? false %}
-{% set shown = min(result.page * blog.perPage, result.total) %}
+{% set shown = min(result.page * result.per_page, result.total) %}
 <nav id="blog-pager" aria-label="{{ 'Pagination'|t }}" class="mt-10 space-y-4 text-sm">
     {% if result.has_more %}
         <div style="display: none" data-show="true" class="flex items-center gap-4">

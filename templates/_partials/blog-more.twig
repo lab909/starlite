@@ -1,10 +1,10 @@
 {# Datastar: "Load more". Appends the next page (same search / tag filter) and replaces the pager. #}
 {% set q = signals.q ?? '' %}
 {% set tag = signals.tag ?? '' %}
-{% set result = blog.page(signals.page ?? 2, q, tag) %}
-{% if result.posts %}
+{% set result = posts().search(q).tag(tag).paginate(signals.page ?? 2) %}
+{% if result.items %}
     {% apply patch_elements({selector: '#blog-posts', mode: 'append'}) %}
-        {% for post in result.posts %}
+        {% for post in result.items %}
             {% include '_partials/blog-card.twig' %}
         {% endfor %}
     {% endapply %}

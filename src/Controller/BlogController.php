@@ -22,7 +22,7 @@ final class BlogController extends Controller
         // Languages can have different numbers of posts: page 3 may only exist in some of them.
         $alternates = $fallbacks = [];
         foreach (array_keys($this->app->site->languages) as $language) {
-            if ($page <= $this->app->blog->page($page, language: $language)['pages']) {
+            if ($page <= $this->app->posts()->language($language)->paginate($page)['pages']) {
                 $alternates[$language] = $this->path($page === 1 ? 'blog' : 'blog_page', $page === 1 ? [] : ['page' => $page], $language);
             } else {
                 $fallbacks[$language] = $this->path('blog', [], $language);
@@ -30,7 +30,7 @@ final class BlogController extends Controller
         }
         $this->app->site->setAlternates($alternates, $fallbacks);
 
-        $result = $this->app->blog->page($page);
+        $result = $this->app->posts()->paginate($page);
         if ($page > $result['pages']) {
             return $this->notFound($this->t('Page not found.'));
         }
@@ -59,7 +59,7 @@ final class BlogController extends Controller
         $this->app->site->setAlternates($alternates, $fallbacks);
 
         // Not written in this language (or doesn't exist): 404, whose switcher still links to the existing versions.
-        $post = $this->app->blog->find($slug);
+        $post = $this->app->posts()->slug($slug)->one();
         if ($post === null) {
             return $this->notFound($this->t('Post not found.'));
         }

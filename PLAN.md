@@ -12,6 +12,14 @@ surfaced most of the generic needs below; Nocturne's own logic stays in its repo
 
 Status: `[ ]` to do · `[~]` in progress · `[x]` done
 
+### Scope: where Starlite stops
+Starlite is for sites whose content is files, edited by people comfortable with Markdown and git.
+Content types stay few and concrete: the **blog** (dated articles), **content pages** (one-offs,
+like Craft singles, nested like a structure) and **data collections** (repeating structured data,
+like Craft channels). No configurable "section types". If a site needs an admin UI for editors, a
+database, user accounts or permissions, relations between entries, revisions, or field layouts per
+entry type, use Craft CMS (or similar) instead: rebuilding those here would only produce a worse CMS.
+
 ---
 
 ## 1. Before cloning
@@ -154,9 +162,35 @@ a video URL, or `::youtube[id]`). **Click-to-load** for privacy: a self-hosted t
 button, and nothing reaches the video host until the visitor clicks (a normal iframe contacts it on
 page load, even on youtube-nocookie.com). The player host goes in `csp.sources` (`frame-src`).
 
-### [ ] Markdown content pages
-`content/pages/<slug>/index.md` (+ `index.<code>.md`, images) for About, Privacy, Imprint, credits…,
-reusing the blog machinery (front matter, assets, translations, SEO, sitemap).
+### [x] Content query API
+Content is queried, not injected, as in Craft's element queries: templates and controllers ask for
+what they need. One immutable, chainable query for every content type:
+
+```twig
+{% set latest = posts().tag('php').limit(5).all() %}
+{% set result = posts().search(q).paginate(page) %}
+{% set faq = collection('faq').all() %}
+{% set ada = collection('team').slug('ada').one() %}
+```
+
+`where`, `slug`, `search`, `tag`, `language`, `orderBy`, `limit`, `offset`; `all`, `one`, `count`,
+`exists`, `paginate`, `countBy`. Same in PHP (`$app->posts()`, `$app->collection('faq')`). The
+`blog` and `collections` Twig globals go away: templates get context (`site`, `seo`, `datastar`)
+automatically, content only when they ask. Designed so `posts('news')` can be added later.
+
+Done: `Starlite\Query` (immutable, generic for PHPStan: `posts()` is a `Query<Post>`), returned by
+`posts()` / `collection(name)` in Twig and `$app->posts()` / `$app->collection(name)` in PHP; field
+names are checked (a typo throws). `Blog` and `Collections` are now sources (compile, cache, files):
+their old query methods and the two globals are gone; the skeleton's templates, BlogController,
+sitemap and feed use queries. `paginate()` returns `items` and `per_page`. Docs: Basics → Querying
+content; the scope rule is in Philosophy.
+
+### [ ] Markdown content pages (singles)
+`content/pages/<path>/index.md` (+ `index.<code>.md`, images) for About, Privacy, Imprint, Contact…,
+reusing the blog machinery (front matter, assets, translations, SEO, sitemap). Nested folders give
+nested URLs (`content/pages/about/team/` → `/about/team`). An optional `template:` in the front
+matter renders a page with its own Twig template (a contact page: text from Markdown, the form in
+the template, a POST route for it). Queried with `pages()` in the same API.
 
 ### [ ] Small helpers
 - [x] `$this->json($data)` in controllers for app data endpoints
@@ -185,6 +219,8 @@ Wired into the same CI as the PHP tests.
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
 - [ ] **Responsive images**: resized WebP/AVIF variants of post images with `srcset`, built at deploy time
+- [ ] **A second blog-like section** (e.g. `content/news/` beside `content/blog/`): another instance
+      of the blog machinery, queried as `posts('news')`. Only when a real site needs it.
 
 ---
 
@@ -209,7 +245,8 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
 2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2)~~: what an app like
    Nocturne needs on day one
-3. Data collections, content pages, media embeds, UI building blocks, helpers, PWA, frontend tests
+3. ~~Data collections~~, content query API, content pages, media embeds, UI building blocks, helpers,
+   PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 
 ---
