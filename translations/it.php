@@ -6,6 +6,8 @@ return [
     'Blog' => 'Blog',
     'Language' => 'Lingua',
     'Site' => 'Sito',
+    'Main' => 'Principale',
+    'Skip to content' => 'Vai al contenuto',
     'Theme' => 'Tema',
     'Light theme' => 'Tema chiaro',
     'Dark theme' => 'Tema scuro',

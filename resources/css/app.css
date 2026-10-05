@@ -80,6 +80,29 @@
     }
 }
 
+/*
+ * Accessibility basics. Keyboard focus is always visible, in the theme's colour, whatever an element's
+ * own styles (the mouse doesn't trigger :focus-visible on links and buttons, so clicks stay clean).
+ * Visitors who ask their system for less motion get no transitions, animations or smooth scrolling.
+ */
+@layer base {
+    :focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
 .heading-permalink {
     @apply ml-2 no-underline opacity-0 transition-opacity;
 }

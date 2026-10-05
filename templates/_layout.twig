@@ -18,8 +18,11 @@
     {{ vite('resources/js/app.js', page_scripts ?? []) }}
 </head>
 <body class="min-h-screen bg-page text-ink antialiased">
+    {# First thing a keyboard user reaches: jumps past the navigation. Above the viewport until focused
+       (screen readers still read it). #}
+    <a href="#main" class="fixed top-3 left-3 z-50 -translate-y-24 rounded-md bg-primary px-4 py-2 text-on-primary focus:translate-y-0">{{ 'Skip to content'|t }}</a>
     <header class="border-b border-line bg-surface">
-        <nav class="mx-auto flex max-w-3xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4">
+        <nav aria-label="{{ 'Main'|t }}" class="mx-auto flex max-w-3xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4">
             <a href="{{ path('home') }}" class="flex items-center gap-1.5 font-semibold tracking-tight"><span class="icon-[app--starlite] size-5" aria-hidden="true"></span>{{ site.name }}</a>
             <a href="{{ path('blog') }}" class="text-muted hover:text-strong">{{ 'Blog'|t }}</a>
             <div class="ml-auto flex items-center gap-4">
@@ -28,7 +31,8 @@
             </div>
         </nav>
     </header>
-    <main class="mx-auto max-w-3xl px-4 py-10">
+    {# tabindex="-1": the skip link moves the keyboard focus here, not only the scroll position. #}
+    <main id="main" tabindex="-1" class="mx-auto max-w-3xl px-4 py-10 focus:outline-none">
         {% block content %}{% endblock %}
     </main>
     <footer class="border-t border-line">

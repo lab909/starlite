@@ -121,11 +121,22 @@ Symbols) plus custom SVGs in `resources/icons/` (`icon-[app--name]`; Vite restar
 Fixed on the way: Vite's `base` is now `/build/` for builds, so files referenced from CSS resolve.
 Docs: "Fonts & icons".
 
-### [ ] UI building blocks
-Accessible Twig macros wired to Datastar: dialog / bottom sheet (native `<dialog>`), toast
-(`aria-live`; a `toast()` helper a controller can trigger over SSE), keyboard-accessible slider
-(arrows, Page Up/Down, Home/End, 44 px hit area). Layout basics: skip link, visible focus styles,
-`prefers-reduced-motion` handling.
+### [~] Accessibility basics and UI building blocks
+UI components (dialog / bottom sheet, toast, slider) are mostly design, so they don't go in the
+framework: it would have to assume the site's Tailwind setup and tokens, change them under sites on
+`composer update`, and steer every project toward them. Native HTML already does most of the work
+(`<dialog>`, `<input type="range">`), with Datastar for the wiring.
+
+1. [x] **Skeleton, now:** accessibility basics every site keeps whatever its UI: a skip link,
+   visible focus styles, `prefers-reduced-motion` handling. Done, with `tests/e2e/accessibility.spec.js`
+   (mutation-checked) and a docs section in Frontend & Vite.
+2. [ ] **Dialog, toast, slider:** built in Nocturne, where they're needed.
+3. [ ] **If a second project wants them:** extract into an optional package (`starlite/ui`) with the
+   package convention (`addTemplates()`, overridable components, one line in `bootstrap.php`).
+4. [ ] **Docs:** a "Patterns" page with recipes to copy (native `<dialog>`, a toast with Datastar).
+5. [ ] **Automated accessibility checks:** axe-core (`@axe-core/playwright`) on every sitemap page in
+   the browser tests, failing on violations such as low colour contrast, missing labels or broken
+   landmarks. Likely to flag a few of the lighter text colours (`text-subtle`) first.
 
 ### [x] Content Security Policy, cache-friendly
 The main missing security header. Use **hashes** of the few inline scripts instead of per-request
@@ -268,6 +279,7 @@ server docs cache /media/ for a week (/build/ stays a year, immutable).
 ### [ ] Optional PWA support
 Web app manifest generated from config (name, colours, icons) and an optional service worker
 (e.g. `vite-plugin-pwa`), switched on per project.
+Like the UI blocks: opt-in per project, so an optional package rather than the framework.
 
 ### [x] Frontend tests
 Vitest for JS modules; Playwright (Chromium is already in the DDEV container) for real user flows.
