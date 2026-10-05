@@ -251,13 +251,19 @@ PageSeo (WebPage JSON-LD), sitemap entries with `lastmod`, `cache:clear` clears 
 files. Front matter YAML errors now name the file (posts too). Demo: Privacy, About (own template
 listing its children) and About → Credits, plus a footer menu. Docs: Content → Content pages.
 
-### [ ] Small helpers
+### [x] Small helpers
 - [x] `$this->json($data)` in controllers for app data endpoints
-- `KernelTestCase` skips Vite when there's no manifest (or fails with a clear message): today a
+- [x] `KernelTestCase` skips Vite when there's no manifest (or fails with a clear message): today a
   new site running `composer test` before the first `npm run build` gets 11 failures that only say
   "Something went wrong." (CI is fine because it builds first)
-- `MEDIA_URL` setting so post images and other large files can be served from a CDN, with long cache
+- [x] `MEDIA_URL` setting so post images and other large files can be served from a CDN, with long cache
   headers by default
+
+Done: `KernelTestCase` lets pages render without a Vite build (a comment instead of the tags) and
+`requireViteBuild()` skips asset tests with a clear message; verified by running the skeleton's tests
+with public/build removed (all pass, 2 skipped). `MEDIA_URL` (`media_url`) serves post and page files
+and video posters from a pull CDN, adds its host to img-src/media-src, refuses non-https values; the
+server docs cache /media/ for a week (/build/ stays a year, immutable).
 
 ### [ ] Optional PWA support
 Web app manifest generated from config (name, colours, icons) and an optional service worker
@@ -306,7 +312,7 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
 2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2)~~: what an app like
    Nocturne needs on day one
-3. ~~Data collections, content query API, content pages~~, media embeds, UI building blocks, helpers,
+3. ~~Data collections, content query API, content pages, media embeds, helpers~~, UI building blocks,
    PWA, frontend tests
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 

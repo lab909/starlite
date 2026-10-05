@@ -12,6 +12,9 @@ return [
     'debug' => getenv('APP_DEBUG') === '1',
     // Public base URL: canonical links, Open Graph, sitemap and feed. Never derived from the Host header.
     'url' => $url,
+    // Where post and page files (images, PDFs, videos) and video posters are served from: '' for this
+    // site (/media/…), or a CDN that pulls them from it, e.g. https://cdn.example.com (MEDIA_URL).
+    'media_url' => (string) getenv('MEDIA_URL'),
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
     // Default language: served without a URL prefix (/blog). Every other language in `languages`
@@ -29,7 +32,7 @@ return [
     // Values page scripts may read (`{{ public_config() }}` in the layout, `publicConfig()` in JS). This is
     // an allowlist: nothing else from this file reaches the browser. Everything here is public, so never
     // put secrets or private URLs in it (a value containing APP_SECRET is refused).
-    // E.g. 'public' => ['media_url' => getenv('MEDIA_URL') ?: '/media'],
+    // E.g. 'public' => ['sounds_url' => getenv('SOUNDS_URL') ?: '/sounds'],
     'public' => [],
     // Content Security Policy: browsers only load scripts, styles, fonts, images, frames… from your own
     // site, plus the hosts listed here per directive. Add what a feature needs, e.g. a video player:

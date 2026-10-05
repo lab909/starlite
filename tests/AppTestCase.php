@@ -10,7 +10,8 @@ use Starlite\Testing\KernelTestCase;
 /**
  * Boots this site (its config/, controllers and templates) with the fixture content in
  * tests/data/content, one post per page and a throw-away cache directory.
- * The templates include the Vite build: run `npm run build` once before the tests.
+ * Without a Vite build, pages render without their asset tags and the tests that check assets are
+ * skipped (requireViteBuild()): run `npm run build` to run them too, as CI does.
  */
 abstract class AppTestCase extends KernelTestCase
 {

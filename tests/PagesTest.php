@@ -38,6 +38,7 @@ final class PagesTest extends AppTestCase
     public function testPageScriptsLoadOnlyWhereTheyAreUsed(): void
     {
         $app = $this->app();
+        $this->requireViteBuild($app);
 
         // Built bundles: the manifest maps the entries to hashed files (run `npm run build` first).
         self::assertMatchesRegularExpression('#<script type="module" src="/build/assets/home-[^"]+\.js"></script>#', self::body($this->request($app, '/')));
@@ -50,7 +51,8 @@ final class PagesTest extends AppTestCase
 
         // First in <head> after the meta tags, before any stylesheet: no flash of the wrong theme.
         self::assertMatchesRegularExpression('#<meta name="viewport"[^>]*>\s*<script>\(function\(\)\{var t;try\{t=JSON\.parse\(localStorage#', $html);
-        self::assertLessThan(strpos($html, 'rel="stylesheet"') ?: strpos($html, '<script type="module"'), strpos($html, Theme::SCRIPT));
+        $assets = min([...array_filter([strpos($html, 'rel="stylesheet"'), strpos($html, '<script type="module"'), strpos($html, '<!-- Vite:')], is_int(...)), PHP_INT_MAX]);
+        self::assertLessThan($assets, strpos($html, Theme::SCRIPT), 'before the Vite tags (or, without a build, their placeholder)');
         foreach (['light', 'dark', 'system'] as $theme) {
             self::assertStringContainsString('<input type="radio" name="theme" value="' . $theme . '" class="sr-only" data-bind:_theme>', $html);
         }
@@ -58,7 +60,9 @@ final class PagesTest extends AppTestCase
 
     public function testTheFontIsSelfHostedAndPreloaded(): void
     {
-        $html = self::body($this->request($this->app(), '/'));
+        $app = $this->app();
+        $this->requireViteBuild($app);
+        $html = self::body($this->request($app, '/'));
 
         self::assertMatchesRegularExpression('#<link rel="preload" href="/build/assets/inter-latin-wght-normal-[^"]+\.woff2" as="font" type="font/woff2" crossorigin>#', $html);
         self::assertStringNotContainsString('fonts.googleapis.com', $html);
