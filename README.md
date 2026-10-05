@@ -7,6 +7,10 @@ JSON-LD, hreflang, sitemap, feeds) and **Vite + Tailwind CSS**. Requires PHP 8.4
 Everything a request needs is compiled ahead of time into plain PHP files in `var/cache`, which
 Opcache keeps in shared memory: no parsing, no database queries, no file scanning per request.
 
+Starlite is freely inspired by [Craft CMS](https://craftcms.com) (Twig-first templates, content you
+query rather than receive, image transforms) and [Datastar](https://data-star.dev) (hypermedia: the
+server renders HTML, the browser stays light).
+
 **This repository is the site skeleton: start every new site from it.** The framework itself is the
 [`starlite/framework`](https://github.com/lab909/starlite-framework) package, installed by Composer.
 

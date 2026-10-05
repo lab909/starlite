@@ -318,7 +318,13 @@ favicon (the missing one logged a 404 on every page).
 - [ ] **Logging**: Monolog instead of bare `error_log()`, optional e-mail alerts in production
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
-- [ ] **Responsive images**: resized WebP/AVIF variants of post images with `srcset`, built at deploy time
+- [x] **Responsive images**: AVIF (where supported) and WebP at 480/960/1440 px with `srcset`, `width`
+      and `height`, lazy loading, for Markdown images and `image()` in templates; built at deploy (kept in
+      `var/images/`, reused), on first request in development. **Every published image loses its
+      metadata** (GPS position, device, time) and is turned upright. Intervention Image v4 (GD or
+      Imagick). Presets like Craft's transforms (`images.presets`: widths, sizes, ratio, mode crop/fit/
+      letterbox/stretch, position, background; every option defaulted), `{preset: 'card'}` in `image()`;
+      only configured widths and shapes can be requested. Docs: Features → Images.
 - [ ] **Translated route segments** (`/it/articoli` instead of `/it/blog`): Symfony's localized
       routes, one path per language, defined in `config/routes.php`.
 - [ ] **A second blog-like section** (e.g. `content/news/` beside `content/blog/`): another instance

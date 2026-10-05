@@ -17,7 +17,8 @@
         </header>
 
         {% if post.image %}
-            <img src="{{ post.image }}" alt="" class="mb-8 w-full rounded-lg">
+            {# Responsive versions (AVIF/WebP at several widths); the first thing seen, so not lazy-loaded. #}
+            {{ image(post.image, '', {loading: 'eager', fetchpriority: 'high', class: 'mb-8 w-full rounded-lg'}) }}
         {% endif %}
 
         {# content(): the Markdown (raw HTML escaped, unsafe links removed) with its ::components rendered. #}

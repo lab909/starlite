@@ -5,6 +5,8 @@
 /var/cache/*
 !/var/cache/.gitkeep
 /var/vite.hot
+# Encoded images (responsive versions, originals without metadata), reused across deploys
+/var/images/
 /.ddev/.env*
 .env
 .env.*

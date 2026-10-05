@@ -128,4 +128,17 @@ final class PagesTest extends AppTestCase
         self::assertStringContainsString('frame-src', (string) $cheatsheet->headers->get('Content-Security-Policy'));
         self::assertStringNotContainsString('frame-src', (string) $this->request($app, '/blog/hello-starlite')->headers->get('Content-Security-Policy'));
     }
+
+    public function testPostImagesAreResponsive(): void
+    {
+        $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
+        $html = self::body($this->request($app, '/blog/hello-starlite'));
+
+        // The cover through image(): modern versions at several widths, the original's size, not lazy.
+        self::assertStringContainsString('<source type="image/webp" srcset="/media/blog/hello-starlite/cover.png.480w.webp 480w, /media/blog/hello-starlite/cover.png.960w.webp 960w, /media/blog/hello-starlite/cover.png.1200w.webp 1200w"', $html);
+        self::assertStringContainsString('<img src="/media/blog/hello-starlite/cover.png" alt="" width="1200" height="630" loading="eager" decoding="async" fetchpriority="high"', $html);
+        if (in_array('avif', $app->images->formats, true)) {
+            self::assertStringContainsString('<source type="image/avif"', $html);
+        }
+    }
 }

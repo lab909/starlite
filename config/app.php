@@ -15,6 +15,21 @@ return [
     // Where post and page files (images, PDFs, videos) and video posters are served from: '' for this
     // site (/media/…), or a CDN that pulls them from it, e.g. https://cdn.example.com (MEDIA_URL).
     'media_url' => (string) getenv('MEDIA_URL'),
+    // Responsive images: post and page images get AVIF (where the server's GD or Imagick can write it)
+    // and WebP versions at these widths, and every published image loses its metadata (GPS position…).
+    // `sizes` says how wide images are shown: the content column here (max-w-3xl, 48rem).
+    'images' => [
+        'widths' => [480, 960, 1440],
+        'sizes' => '(min-width: 48rem) 48rem, 100vw',
+        // Presets for templates, like Craft's image transforms: {{ image(url, alt, {preset: 'card'}) }}.
+        // Every option is optional: widths and sizes default to the ones above; with a ratio, mode
+        // (crop, fit, letterbox, stretch) defaults to crop, position to center, background to transparent.
+        'presets' => [
+            // 'hero' => ['widths' => [1280, 1920, 2560], 'sizes' => '100vw'],
+            // 'card' => ['widths' => [400, 800], 'ratio' => '16:9', 'sizes' => '(min-width: 48rem) 24rem, 100vw'],
+            // 'avatar' => ['widths' => [96, 192], 'ratio' => '1:1', 'position' => 'top', 'sizes' => '6rem'],
+        ],
+    ],
     // Sending email (forms): a Symfony Mailer DSN, e.g. smtp://user:pass@smtp.example.com:587, and the
     // address messages come from (one of your own domain). In DDEV, Mailpit catches everything.
     'mailer' => [
