@@ -100,4 +100,17 @@ final class PagesTest extends AppTestCase
         self::assertSame(404, $missing->getStatusCode());
         self::assertStringContainsString('Page not found.', self::body($missing));
     }
+
+    public function testContentComponentsRenderInPosts(): void
+    {
+        $app = $this->app(true, ['content_dir' => self::ROOT . '/content']);
+
+        // ::related-posts{limit=2} at the end of the post: templates/_components/related-posts.twig.
+        $post = self::body($this->request($app, '/blog/hello-starlite'));
+        self::assertMatchesRegularExpression('#<h2[^>]*>Related posts</h2>.*href="/blog/markdown-cheatsheet"#s', $post);
+        self::assertStringNotContainsString('href="/blog/hello-starlite" class="hover:underline"', $post, 'not the post itself');
+
+        // The cheatsheet shows the syntax in a code block: text, not a component.
+        self::assertStringContainsString('<code class="language-md">::related-posts{limit=2}', self::body($this->request($app, '/blog/markdown-cheatsheet')));
+    }
 }

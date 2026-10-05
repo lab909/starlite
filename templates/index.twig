@@ -58,7 +58,7 @@
                         {{ item.question }}
                         <span class="icon-[lucide--chevron-down] size-4 shrink-0 text-subtle transition-transform group-open:rotate-180" aria-hidden="true"></span>
                     </summary>
-                    <div class="prose prose-stone dark:prose-invert mt-2 max-w-none text-muted">{{ item.html|raw }}</div>
+                    <div class="prose prose-stone dark:prose-invert mt-2 max-w-none text-muted">{{ content(item) }}</div>
                 </details>
             {% endfor %}
         </div>

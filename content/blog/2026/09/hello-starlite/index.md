@@ -17,3 +17,5 @@ little server-side interactivity.
 - **Markdown** posts like this one, compiled once at deploy time
 
 Everything ends up as PHP files in `var/cache`, so Opcache serves them straight from shared memory.
+
+::related-posts{limit=2}

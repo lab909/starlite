@@ -20,6 +20,8 @@
 }
 
 @source "../../templates";
+/* The framework's default templates (content components such as ::youtube), which sites can override. */
+@source "../../vendor/starlite/framework/resources/templates";
 /* The documentation (maintainers' clone) is a separate site: keep its Markdown out of the class scan. */
 @source not "../../docs";
 

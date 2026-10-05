@@ -20,8 +20,8 @@
             <img src="{{ post.image }}" alt="" class="mb-8 w-full rounded-lg">
         {% endif %}
 
-        {# Safe: Markdown is rendered with raw HTML escaped and unsafe links removed (lib/src/Blog/MarkdownParser.php). #}
-        <div class="prose prose-stone dark:prose-invert max-w-none">{{ post.html|raw }}</div>
+        {# content(): the Markdown (raw HTML escaped, unsafe links removed) with its ::components rendered. #}
+        <div class="prose prose-stone dark:prose-invert max-w-none">{{ content(post) }}</div>
     </article>
 
     <p class="mt-12"><a href="{{ path('blog') }}" class="text-muted hover:underline">{{ '← All posts'|t }}</a></p>

@@ -15,3 +15,5 @@ bisogno di un po' di interattività lato server.
 - articoli in **Markdown** come questo, compilati una sola volta al deploy
 
 Tutto finisce in file PHP dentro `var/cache`, così Opcache li serve direttamente dalla memoria condivisa.
+
+::related-posts{limit=2}

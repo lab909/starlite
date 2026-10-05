@@ -168,12 +168,41 @@ Done as described, for pages and posts. `Kernel::path()` localizes the `page` an
 the skeleton's controllers look items up by `uri` and redirect folder paths. Demo: /it/chi-siamo,
 /it/chi-siamo/riconoscimenti, /it/blog/ciao-starlite.
 
+### [x] Content components
+Small reusable pieces inside Markdown (posts, pages, collection bodies), like Hugo shortcodes:
+
+```md
+::audio-player{playlist="my_playlist"}
+::youtube{id="dQw4w9WgXcQ"}
+```
+
+A `::name{key="value"}` line renders `_components/<name>.twig` with its arguments (plain strings,
+numbers, booleans; no expressions) plus the item it appears in as `entry`. Content stays compiled:
+items keep placeholders and `{{ content(item) }}` renders the components per request. An unknown
+component fails the build with the file name; code blocks are never touched. Not raw Twig in
+Markdown: that would turn content into code, break code examples and make every post a template.
+Template lookup: the site's `templates/`, then packages (`$app->addTemplates($dir)`), then the
+framework's defaults (`@starlite/…`), so a site can override any component. The feed shows a link
+to the post in place of a component.
+
+Done: a CommonMark block extension (`Starlite\Content`), items carry `components`, `content(item)` in
+Twig and PHP, `addTemplates()`, `Kernel::TEMPLATES`; the deploy compiles every template folder.
+Unknown, malformed or misplaced components (in a `markdown` field) fail with the file name; up to
+three spaces of indentation like any block. Demo: `related-posts` at the end of the first post, the
+syntax in the Markdown cheatsheet. Docs: Content → Content components.
+
 ### [ ] Media embeds in posts
-YouTube / Vimeo (and similar) in Markdown, without allowing raw HTML (posts escape it, by design):
-an embed syntax the Markdown parser turns into markup the framework controls (e.g. a line with only
-a video URL, or `::youtube[id]`). **Click-to-load** for privacy: a self-hosted thumbnail and play
-button, and nothing reaches the video host until the visitor clicks (a normal iframe contacts it on
-page load, even on youtube-nocookie.com). The player host goes in `csp.sources` (`frame-src`).
+YouTube / Vimeo as framework default components (`::youtube{id="…"}`), overridable by the site.
+**Click-to-load** for privacy: a self-hosted thumbnail and play button, and nothing reaches the
+video host until the visitor clicks (a normal iframe contacts it on page load, even on
+youtube-nocookie.com). The player host goes in `csp.sources` (`frame-src`).
+
+### [x] Writing a Starlite package (docs)
+No plugin system: a Composer package exposes `register(Kernel $app)`, called from the site's
+`config/bootstrap.php`, and adds Twig extensions, services, commands, deploy steps and templates
+(`addTemplates()`, overridable by the site). Revisit only if real packages outgrow the convention.
+Done: Extending → Writing a package (commands: an empty subclass in the site's src/Command/, the
+package naming it in configure(), since attributes aren't inherited).
 
 ### [x] Content query API
 Content is queried, not injected, as in Craft's element queries: templates and controllers ask for

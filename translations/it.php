@@ -13,6 +13,8 @@ return [
     '← Home' => '← Home',
 
     // Blog
+    'Related posts' => 'Articoli correlati',
+    'Open the page to see this part.' => 'Apri la pagina per vedere questa parte.',
     'Atom feed' => 'Feed Atom',
     'Search posts…' => 'Cerca articoli…',
     'all' => 'tutti',

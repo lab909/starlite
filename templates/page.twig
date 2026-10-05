@@ -12,7 +12,7 @@
             {% endif %}
         {% endif %}
         <h1 class="mb-8 text-4xl font-bold tracking-tight">{{ page.title }}</h1>
-        {# Safe: Markdown is rendered with raw HTML escaped and unsafe links removed. #}
-        <div class="prose prose-stone dark:prose-invert max-w-none">{{ page.html|raw }}</div>
+        {# content(): the Markdown (raw HTML escaped, unsafe links removed) with its ::components rendered. #}
+        <div class="prose prose-stone dark:prose-invert max-w-none">{{ content(page) }}</div>
     </article>
 {% endblock %}

@@ -1,0 +1,16 @@
+{#
+    Content component: `::related-posts{limit=2}` (or `{tag="php"}`) on its own line in a post.
+    Gets its arguments plus `entry`, the post it's in, and lists other posts: the newest, or those
+    with the tag. Rendered per request, in the post's language.
+#}
+{% set related = posts().tag(tag ?? null).all()|filter(post => post.slug != entry.slug)|slice(0, limit ?? 3) %}
+{% if related %}
+    <aside class="not-prose my-8 rounded-md border border-line bg-surface p-4">
+        <h2 class="mb-2 text-sm font-semibold text-muted">{{ 'Related posts'|t }}</h2>
+        <ul class="space-y-1">
+            {% for post in related %}
+                <li><a href="{{ path('blog_post', {slug: post.slug}) }}" class="hover:underline">{{ post.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </aside>
+{% endif %}

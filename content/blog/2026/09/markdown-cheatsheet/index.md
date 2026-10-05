@@ -35,3 +35,15 @@ Put images next to `index.md` and link them relatively: `![Alt text](cover.png)`
 
 Raw HTML such as <script>alert(1)</script> is escaped, and external links like
 [Datastar](https://data-star.dev) get `rel="noopener noreferrer"`.
+
+## Components
+
+A line of its own like `::name{key="value"}` places a component: a small template from
+`templates/_components/`, such as related posts or (soon) a video. Arguments are plain text, numbers
+or `true`/`false`:
+
+```md
+::related-posts{limit=2}
+```
+
+Inside code, like above, it's just text. An unknown component stops the build with the file name.
