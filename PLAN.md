@@ -296,7 +296,9 @@ favicon (the missing one logged a 404 on every page).
 
 ## 3. Nice to have
 
-- [ ] **Translate the site name and description** (`config/app.php` → `site`), the last untranslated strings
+- [x] **Translate the site name and description** (`config/app.php` → `site`): each value is a string
+      or a map language => value (name, description, share image, author); `$site->name()` etc. in
+      PHP, `site.name` in Twig, in the current language; missing languages use the default one's.
 - [ ] **Contact form**: `symfony/mailer`, validation, database-free spam protection (honeypot +
       minimum fill time, optional rate limit by IP in a file cache), Datastar for a no-reload form
 - [ ] **Logging**: Monolog instead of bare `error_log()`, optional e-mail alerts in production

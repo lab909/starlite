@@ -37,7 +37,7 @@ final class BlogController extends Controller
 
         $seo = $this->app->seo
             ->title($page === 1 ? $this->t('Blog') : $this->t('Blog · Page {page}', ['page' => $page]))
-            ->description($this->t('Articles about {site}.', ['site' => $this->app->site->name]));
+            ->description($this->t('Articles about {site}.', ['site' => $this->app->site->name()]));
         $seo->schema(Schema::blog()->name($seo->pageTitle())->url($seo->canonicalUrl()));
 
         return $this->render('blog/index.twig', ['result' => $result]);

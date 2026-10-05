@@ -12,6 +12,10 @@ final class PagesTest extends AppTestCase
     {
         $app = $this->app();
 
+        // The site description from config/app.php, per language.
+        self::assertStringContainsString('<meta name="description" content="A database-free PHP micro framework', self::body($this->request($app, '/')));
+        self::assertStringContainsString('<meta name="description" content="Un micro framework PHP senza database', self::body($this->request($app, '/it')));
+
         self::assertStringContainsString('Datastar demo', self::body($this->request($app, '/')));
         self::assertStringContainsString('Demo Datastar', self::body($this->request($app, '/it')));
     }

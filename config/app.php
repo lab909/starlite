@@ -44,10 +44,15 @@ return [
         'sources' => [],
     ],
     // Site-wide SEO defaults; pages override them through `seo` (see README, "SEO").
+    // Each value is the same in every language, or a map language => value; a language left out of
+    // a map uses the default language's (null in a map: none in that language, e.g. no image).
     'site' => [
         'name' => 'Starlite',
-        'description' => 'A database-free PHP micro framework for static-like dynamic sites.',
-        'image' => null,   // default share image, e.g. '/images/og-default.png'
+        'description' => [
+            'en' => 'A database-free PHP micro framework for static-like dynamic sites.',
+            'it' => 'Un micro framework PHP senza database per siti dinamici veloci come quelli statici.',
+        ],
+        'image' => null,   // default share image, e.g. '/images/og-default.png' or ['en' => …, 'it' => …]
         'author' => null,  // used for blog posts and the feed; defaults to the site name
     ],
 ];
