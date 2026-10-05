@@ -1,0 +1,54 @@
+{#
+    The contact form (config/forms.php "contact"): on the Contact page, and re-rendered in place by
+    Datastar after each submit (PageController). Without JavaScript it's a normal form post.
+    `form` has the values, the errors (per field, and _form for the whole form) and whether it was sent.
+#}
+{% set url = path('page', {path: page.path}) %}
+{% set input = 'w-full rounded-md border border-line-strong bg-surface px-3 py-2' %}
+<form id="contact-form" method="post" action="{{ url }}" class="mt-8 space-y-5"
+      data-on:submit__prevent="{{ datastar.action('post', url, {contentType: 'form'}) }}" data-indicator:_sending>
+    {% if form.sent %}
+        <p role="status" class="rounded-md border border-line bg-surface p-4">{{ 'Thanks! Your message is on its way.'|t }}</p>
+    {% else %}
+        {% if form.errors._form is defined %}
+            <p role="alert" class="rounded-md bg-warning-soft p-3 text-warning">{{ form.errors._form }}</p>
+        {% endif %}
+
+        {% for field, attributes in {
+            name: {label: 'Name'|t, type: 'text', autocomplete: 'name', maxlength: 100},
+            email: {label: 'Email'|t, type: 'email', autocomplete: 'email', maxlength: 254},
+            message: {label: 'Message'|t, type: 'textarea', minlength: 10, maxlength: 5000},
+        } %}
+            {% set error = form.errors[field] ?? null %}
+            <div class="space-y-1">
+                <label for="contact-{{ field }}" class="block font-medium">{{ attributes.label }}</label>
+                {% if attributes.type == 'textarea' %}
+                    <textarea id="contact-{{ field }}" name="{{ field }}" rows="6" required
+                              minlength="{{ attributes.minlength }}" maxlength="{{ attributes.maxlength }}" class="{{ input }}"
+                              {% if error %}aria-invalid="true" aria-describedby="contact-{{ field }}-error"{% endif %}>{{ form.values[field] ?? '' }}</textarea>
+                {% else %}
+                    <input id="contact-{{ field }}" name="{{ field }}" type="{{ attributes.type }}" required
+                           autocomplete="{{ attributes.autocomplete }}" maxlength="{{ attributes.maxlength }}"
+                           value="{{ form.values[field] ?? '' }}" class="{{ input }}"
+                           {% if error %}aria-invalid="true" aria-describedby="contact-{{ field }}-error"{% endif %}>
+                {% endif %}
+                {% if error %}
+                    <p id="contact-{{ field }}-error" class="text-sm text-warning">{{ error }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {# The spam checks' hidden fields (config/forms.php `spam`). #}
+        {{ form_spam('contact') }}
+
+        <div class="flex flex-wrap items-center gap-4">
+            <button type="submit" data-attr:disabled="$_sending" class="rounded-md bg-primary px-4 py-2 text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                <span data-show="!$_sending">{{ 'Send'|t }}</span><span data-show="$_sending" style="display: none">{{ 'Sending…'|t }}</span>
+            </button>
+            <p class="text-sm text-muted">
+                {{ 'We use your details only to reply to you.'|t }}
+                <a href="{{ path('page', {path: 'privacy'}) }}" class="underline">{{ 'Privacy'|t }}</a>
+            </p>
+        </div>
+    {% endif %}
+</form>

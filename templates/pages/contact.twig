@@ -1,0 +1,9 @@
+{% extends 'page.twig' %}
+
+{# Chosen by `template: pages/contact.twig` in content/pages/contact/index.md: the page's text, then the
+   form (`form: contact` there, defined in config/forms.php). #}
+
+{% block content %}
+    {{ parent() }}
+    {% include '_forms/contact.twig' %}
+{% endblock %}

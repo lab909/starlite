@@ -29,6 +29,10 @@ export default defineConfig({
             APP_SECRET: 'e2e-tests-only-not-a-real-secret-0123456789abcdef',
             APP_DEBUG: '0',
             PHP_CLI_SERVER_WORKERS: '4', // Datastar requests run alongside page loads
+            // Forms send through a transport that discards everything.
+            MAILER_DSN: 'null://null',
+            MAILER_FROM: 'site@example.test',
+            CONTACT_TO: 'owner@example.test',
         },
     },
 });

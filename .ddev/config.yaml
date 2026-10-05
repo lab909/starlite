@@ -11,7 +11,11 @@ database:
     version: "11.8"
 use_dns_when_possible: true
 composer_version: "2"
-web_environment: []
+# Development email: Mailpit catches every message (see `ddev mailpit`); nothing is really sent.
+web_environment:
+    - MAILER_DSN=smtp://127.0.0.1:1025
+    - MAILER_FROM=site@starlite-framework.ddev.site
+    - CONTACT_TO=you@example.test
 nodejs_version: "24"
 # Vite dev server (npm run dev) at https://starlite-framework.ddev.site:5173
 web_extra_exposed_ports:

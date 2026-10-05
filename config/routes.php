@@ -36,7 +36,8 @@ return static function (Kernel $app): void {
     // Content pages: content/pages/privacy/index.md is /privacy. A catch-all, so it has a low priority:
     // every other route wins, wherever it's added. `deploy` reports pages that a route hides.
     $app->get(Pages::ASSET_URL . '/{file}', PageAssetController::class, 'page_asset', ['file' => '.+']);
-    $app->get('/{path}', [PageController::class, 'show'], 'page', ['path' => Pages::PATH], priority: -1);
+    // POST too, for pages with a form (`form:` in their front matter), like the contact page.
+    $app->route(['GET', 'POST'], '/{path}', [PageController::class, 'show'], 'page', ['path' => Pages::PATH], priority: -1);
     // Link to a page by its folder path, `path('page', {path: 'about'})`: Starlite writes each
     // language's URL, translated slugs included.
 };

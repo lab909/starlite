@@ -15,6 +15,12 @@ return [
     // Where post and page files (images, PDFs, videos) and video posters are served from: '' for this
     // site (/media/…), or a CDN that pulls them from it, e.g. https://cdn.example.com (MEDIA_URL).
     'media_url' => (string) getenv('MEDIA_URL'),
+    // Sending email (forms): a Symfony Mailer DSN, e.g. smtp://user:pass@smtp.example.com:587, and the
+    // address messages come from (one of your own domain). In DDEV, Mailpit catches everything.
+    'mailer' => [
+        'dsn' => getenv('MAILER_DSN') ?: null,
+        'from' => getenv('MAILER_FROM') ?: null,
+    ],
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
     // Default language: served without a URL prefix (/blog). Every other language in `languages`

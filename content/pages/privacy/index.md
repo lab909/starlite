@@ -13,4 +13,9 @@ then on, their privacy policy applies to that video.
 Your browser keeps two preferences in its own storage, which never leaves your device: the colour
 theme you choose and the volume of the demo tone.
 
+When you write to us with the contact form, your name, email address and message are sent to us by
+email, only so we can reply. They aren't stored on this site. To limit spam, the site remembers for an
+hour how many messages came from your connection, as a scrambled code that can't be turned back into
+your IP address.
+
 The web server keeps standard access logs (IP address, page, time) for security, for a limited time.

@@ -299,8 +299,22 @@ favicon (the missing one logged a 404 on every page).
 - [x] **Translate the site name and description** (`config/app.php` → `site`): each value is a string
       or a map language => value (name, description, share image, author); `$site->name()` etc. in
       PHP, `site.name` in Twig, in the current language; missing languages use the default one's.
-- [ ] **Contact form**: `symfony/mailer`, validation, database-free spam protection (honeypot +
-      minimum fill time, optional rate limit by IP in a file cache), Datastar for a no-reload form
+- [x] **Forms and a contact form** (agreed design):
+      - **Framework:** forms defined in `config/forms.php` (typed fields, required/min/max/choices,
+        custom rules per field from `bootstrap.php`), validation messages through the translations,
+        sending with Symfony Mailer (`MAILER_DSN` / `MAILER_FROM` in `.env`, the visitor in Reply-To),
+        a `SpamCheck` interface with local checks only: honeypot, timing (a signed token; pages with a
+        form aren't cached), rate limit (a keyed hash of the IP, never the IP), link limit.
+      - **Skeleton:** a Contact content page (`form: contact` in its front matter), works without
+        JavaScript, Datastar for inline errors and the thank-you; DDEV's Mailpit in development; a
+        note on the Privacy page. Submissions are emailed, never stored.
+      - **Later:** ALTCHA (self-hosted proof of work) as an opt-in check; third-party captchas
+        (Turnstile, hCaptcha) only as optional packages, loaded on interaction, CSP on that page only.
+      - **Not now:** attachments.
+      - Done: `Starlite\Forms` (Form, Forms, Submission, Spam\{Honeypot, Timing, MaxLinks, RateLimit}),
+        `form:` in page front matter, `form_spam()`, `KernelTestCase::request(parameters:)`; the skeleton's
+        Contact page (`/contact`, `/it/contatti`) checked end to end with Mailpit, plus PHPUnit and
+        Playwright tests (with and without JavaScript); docs: Features → Forms.
 - [ ] **Logging**: Monolog instead of bare `error_log()`, optional e-mail alerts in production
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
