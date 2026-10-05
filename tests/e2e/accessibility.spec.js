@@ -25,7 +25,9 @@ test('keyboard focus is always visible', async ({ page }) => {
 });
 
 test('reduced motion turns transitions off', async ({ page }) => {
-    const duration = async () => page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('figure a > span')).transitionDuration));
+    // The video's play button: the element with a transition (whether or not the poster was downloaded,
+    // which CI never does: without it, a plain placeholder comes first in the link).
+    const duration = async () => page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('figure .transition')).transitionDuration));
 
     await page.goto('/blog/markdown-cheatsheet');
     expect(await duration()).toBeGreaterThan(0.1);
