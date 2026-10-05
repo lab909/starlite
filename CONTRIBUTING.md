@@ -38,14 +38,18 @@ docs changes from `docs/`, and skeleton changes from the root.
 # the skeleton (app tests)
 ddev composer test && ddev composer analyse
 
+# the skeleton in a real browser (Playwright, against the production build)
+ddev npm run build && ddev exec CHROMIUM_PATH=/usr/bin/chromium npm run test:e2e
+
 # the framework
 cd packages/starlite && composer update && composer test && composer analyse
+cd packages/starlite && npm install && npm test    # Vitest: the browser helpers
 
 # the docs
 cd docs && npm install && npm run build     # npm run dev → https://<project>.ddev.site:5174
 ```
 
-Run `npm run build` in the root once before the app tests: the templates include the Vite manifest.
+Without `npm run build` in the root, the app tests that check built assets are skipped.
 
 ## Guidelines
 

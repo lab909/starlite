@@ -22,3 +22,7 @@
 
 # A new site commits its own lock file: remove this line after creating your site from the skeleton.
 /composer.lock
+
+# Playwright reports and traces
+/test-results/
+/playwright-report/

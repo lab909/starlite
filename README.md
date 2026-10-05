@@ -46,6 +46,7 @@ See [Building a site on Starlite](https://lab909.github.io/starlite-framework-do
 ```sh
 ddev composer test           # PHPUnit (your app's tests)
 ddev composer analyse        # PHPStan, level 8
+ddev exec CHROMIUM_PATH=/usr/bin/chromium npm run test:e2e   # the site in a real browser (after npm run build)
 ddev console deploy          # production build + Opcache refresh
 ddev console cache:clear     # back to development after a deploy
 ```

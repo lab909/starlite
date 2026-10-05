@@ -269,9 +269,16 @@ server docs cache /media/ for a week (/build/ stays a year, immutable).
 Web app manifest generated from config (name, colours, icons) and an optional service worker
 (e.g. `vite-plugin-pwa`), switched on per project.
 
-### [ ] Frontend tests
+### [x] Frontend tests
 Vitest for JS modules; Playwright (Chromium is already in the DDEV container) for real user flows.
 Wired into the same CI as the PHP tests.
+
+Done: Vitest in the framework (`tests/js`, jsdom + the real Datastar): persist, ready, theme,
+publicConfig; in its CI. Playwright in the skeleton (`tests/e2e`, PHP's built-in server in
+production mode): every sitemap URL, Datastar demos, theme without flash, persistence, click-to-load
+video, translated slugs, no-JavaScript fallbacks; every test fails on a CSP violation or console
+error. In CI with an HTML report on failure. Both suites mutation-checked. The skeleton got a
+favicon (the missing one logged a 404 on every page).
 
 ---
 
@@ -312,8 +319,8 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 1. ~~Tests + PHPStan, extension points, docs, separate package~~ — done
 2. ~~Page-specific JS + Datastar pattern, theme, fonts/icons, CSP (section 2)~~: what an app like
    Nocturne needs on day one
-3. ~~Data collections, content query API, content pages, media embeds, helpers~~, UI building blocks,
-   PWA, frontend tests
+3. ~~Data collections, content query API, content pages, media embeds, helpers, frontend tests~~,
+   UI building blocks, PWA
 4. Create the Nocturne site from the skeleton; section 3 items as projects need them
 
 ---

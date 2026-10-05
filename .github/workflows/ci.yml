@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   test:
-    name: Tests, static analysis, assets
+    name: Tests, static analysis, assets, browser tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
-      # Before the tests: the app's templates include the Vite manifest.
+      # Before the tests, so the ones that check built assets run too.
       - name: Build assets
         run: npm run build
 
@@ -43,3 +43,19 @@ jobs:
 
       - name: Static analysis
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      # The real site in Chromium (tests/e2e): no CSP violations or errors on any page, Datastar,
+      # theme, persistence, click-to-load videos, translated URLs, no-JavaScript fallbacks.
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: npm run test:e2e
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
