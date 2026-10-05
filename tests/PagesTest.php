@@ -103,7 +103,8 @@ final class PagesTest extends AppTestCase
 
     public function testContentComponentsRenderInPosts(): void
     {
-        $app = $this->app(true, ['content_dir' => self::ROOT . '/content']);
+        // Production mode: a missing video poster is never downloaded during a request (only by deploy).
+        $app = $this->app(overrides: ['content_dir' => self::ROOT . '/content']);
 
         // ::related-posts{limit=2} at the end of the post: templates/_components/related-posts.twig.
         $post = self::body($this->request($app, '/blog/hello-starlite'));
@@ -111,6 +112,12 @@ final class PagesTest extends AppTestCase
         self::assertStringNotContainsString('href="/blog/hello-starlite" class="hover:underline"', $post, 'not the post itself');
 
         // The cheatsheet shows the syntax in a code block: text, not a component.
-        self::assertStringContainsString('<code class="language-md">::related-posts{limit=2}', self::body($this->request($app, '/blog/markdown-cheatsheet')));
+        $cheatsheet = $this->request($app, '/blog/markdown-cheatsheet');
+        self::assertStringContainsString('<code class="language-md">::related-posts{limit=2}', self::body($cheatsheet));
+
+        // ::youtube, a framework default component: click-to-load, the player allowed on this page only.
+        self::assertStringContainsString('data-src="https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ', self::body($cheatsheet));
+        self::assertStringContainsString('frame-src', (string) $cheatsheet->headers->get('Content-Security-Policy'));
+        self::assertStringNotContainsString('frame-src', (string) $this->request($app, '/blog/hello-starlite')->headers->get('Content-Security-Policy'));
     }
 }

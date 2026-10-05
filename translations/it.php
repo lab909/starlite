@@ -15,6 +15,8 @@ return [
     // Blog
     'Related posts' => 'Articoli correlati',
     'Open the page to see this part.' => 'Apri la pagina per vedere questa parte.',
+    'Play video: {title}' => 'Riproduci il video: {title}',
+    'Plays from {host}: nothing is loaded from it until you press play.' => 'Riprodotto da {host}: non viene caricato nulla finché non premi play.',
     'Atom feed' => 'Feed Atom',
     'Search posts…' => 'Cerca articoli…',
     'all' => 'tutti',

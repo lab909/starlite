@@ -191,11 +191,19 @@ Unknown, malformed or misplaced components (in a `markdown` field) fail with the
 three spaces of indentation like any block. Demo: `related-posts` at the end of the first post, the
 syntax in the Markdown cheatsheet. Docs: Content → Content components.
 
-### [ ] Media embeds in posts
+### [x] Media embeds in posts
 YouTube / Vimeo as framework default components (`::youtube{id="…"}`), overridable by the site.
 **Click-to-load** for privacy: a self-hosted thumbnail and play button, and nothing reaches the
 video host until the visitor clicks (a normal iframe contacts it on page load, even on
-youtube-nocookie.com). The player host goes in `csp.sources` (`frame-src`).
+youtube-nocookie.com). The player host is allowed in `frame-src` only on pages that show a video.
+
+Done: framework components `_components/youtube.twig` / `vimeo.twig` sharing `_embeds/video.twig`;
+`Starlite\Content\Embeds` validates ids at compile time and downloads posters and titles (deploy step
+`embeds`; lazily once in development; only real images are saved; failures are remembered and
+retried by deploy). Click-to-load with Datastar (the iframe has no src until play), a link without
+JavaScript. New `csp_allow()` for per-response CSP sources, used by `video()`. Verified in Chromium:
+before play only this site is contacted. Demo in the Markdown cheatsheet (Big Buck Bunny, CC BY);
+the Privacy page mentions it.
 
 ### [x] Writing a Starlite package (docs)
 No plugin system: a Composer package exposes `register(Kernel $app)`, called from the site's

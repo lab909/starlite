@@ -47,3 +47,8 @@ or `true`/`false`:
 ```
 
 Inside code, like above, it's just text. An unknown component stops the build with the file name.
+
+Videos are built-in components: `::youtube{id="…"}` and `::vimeo{id="…"}`. Nothing is loaded from
+YouTube or Vimeo until you press play; the poster comes from this site:
+
+::youtube{id="aqz-KE-bpKQ" title="Big Buck Bunny (Blender Foundation, CC BY 3.0)"}
