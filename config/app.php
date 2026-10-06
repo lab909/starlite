@@ -36,6 +36,16 @@ return [
         'dsn' => getenv('MAILER_DSN') ?: null,
         'from' => getenv('MAILER_FROM') ?: null,
     ],
+    // The log: a file per day in var/log/ (app-2026-10-06.log), deleted after `days`. Entries say which
+    // page a message comes from (method, path, route), never who was visiting: no IP address, browser
+    // or query string. `level`: debug in development, info in production (LOG_LEVEL). `alert_to`: who
+    // gets an email when something breaks (LOG_ALERT_TO, sent with the mailer above; once per hour per
+    // error). `path`: another file, or a stream like php://stderr for platforms that collect it.
+    'log' => [
+        'level' => getenv('LOG_LEVEL') ?: null,
+        'days' => 14,
+        'alert_to' => getenv('LOG_ALERT_TO') ?: null,
+    ],
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
     // Default language: served without a URL prefix (/blog). Every other language in `languages`

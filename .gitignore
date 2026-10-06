@@ -7,6 +7,8 @@
 /var/vite.hot
 # Encoded images (responsive versions, originals without metadata), reused across deploys
 /var/images/
+# Logs, kept on the server only (see config/app.php `log`)
+/var/log/
 /.ddev/.env*
 .env
 .env.*

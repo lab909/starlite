@@ -315,7 +315,16 @@ favicon (the missing one logged a 404 on every page).
         `form:` in page front matter, `form_spam()`, `KernelTestCase::request(parameters:)`; the skeleton's
         Contact page (`/contact`, `/it/contatti`) checked end to end with Mailpit, plus PHPUnit and
         Playwright tests (with and without JavaScript); docs: Features → Forms.
-- [ ] **Logging**: Monolog instead of bare `error_log()`, optional e-mail alerts in production
+- [x] **Logging**: Monolog (PSR-3, `$app->logger`, `LoggerInterface` in the container) instead of bare
+      `error_log()`. A file per day in `var/log/`, deleted after 14 days (`log.days`); `LOG_LEVEL`
+      (debug in development, info in production); or a stream (`php://stderr`). **Privacy:** entries
+      carry method, path and route only (no IP, browser, referrer or query string), 404s aren't logged,
+      traces have no function arguments in production (`zend.exception_ignore_args`), no form content,
+      no third-party service. Email alerts (`LOG_ALERT_TO`, through the forms' mailer) for errors, with
+      the request's earlier lines (fingers crossed), once per hour per error (deduplication), sent after
+      the response; a failed alert is noted in the file. PHP warnings and fatal errors in production go
+      through the logger (deprecations are left to PHP). `KernelTestCase::logged()`. Docs: Features →
+      Logging (with the reasons), Servers → Access logs.
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
 - [x] **Responsive images**: AVIF (where supported) and WebP at 480/960/1440 px with `srcset`, `width`

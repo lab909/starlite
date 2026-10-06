@@ -59,16 +59,9 @@ final class ContactTest extends AppTestCase
 
     public function testABotIsToldItWorked(): void
     {
-        // No timing token and a filled honeypot: rejected, but the bot can't tell. (The log is redirected
-        // here: PHPUnit captures error_log() output from inside the test.)
-        $log = $this->tempDir('log') . '/error.log';
-        $previous = ini_set('error_log', $log);
-        try {
-            $response = $this->post('/contact', self::VALID + ['website' => 'https://spam.test']);
-        } finally {
-            ini_set('error_log', (string) $previous);
-        }
-        self::assertStringContainsString('Form "contact" rejected as spam (honeypot).', (string) file_get_contents($log));
+        // No timing token and a filled honeypot: rejected, but the bot can't tell.
+        $response = $this->post('/contact', self::VALID + ['website' => 'https://spam.test']);
+        self::assertStringContainsString('Form "contact" rejected as spam (honeypot).', $this->logged());
 
         self::assertSame(303, $response->getStatusCode());
         self::assertSame('/contact?sent=1', $response->headers->get('Location'));
