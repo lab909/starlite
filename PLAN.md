@@ -327,6 +327,12 @@ favicon (the missing one logged a 404 on every page).
       Logging (with the reasons), Servers → Access logs.
 - [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
       `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
+- [ ] **Modal images** (lightbox): click an image in a post or page to see it large, in a modal over
+      the page. A native `<dialog>` (focus trap, Esc and backdrop to close, focus back on the image),
+      opened with Datastar or a small helper, loading a larger version from the image's `srcset`; works
+      as a plain link to the full image without JavaScript. Opt-in per image or per page; captions
+      from the alt text or title; arrows/swipe between a post's images as a possible second step.
+      Respect `prefers-reduced-motion`; no third-party library, nothing leaves the site
 - [x] **Responsive images**: AVIF (where supported) and WebP at 480/960/1440 px with `srcset`, `width`
       and `height`, lazy loading, for Markdown images and `image()` in templates; built at deploy (kept in
       `var/images/`, reused), on first request in development. **Every published image loses its
