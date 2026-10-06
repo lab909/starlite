@@ -55,6 +55,13 @@ ddev console deploy          # production build + Opcache refresh
 ddev console cache:clear     # back to development after a deploy
 ```
 
+## Licenses
+
+The site's built files include third-party code: the Datastar client (MIT), Lucide icons (ISC/MIT),
+the Inter font (SIL Open Font License) and Tailwind CSS (MIT). They carry short notices, and
+`public/third-party-licenses.txt` has the full texts. If you change fonts, icons or scripts, update
+that file too (`tests/LicensesTest.php` checks it).
+
 ## Contributing to Starlite
 
 Maintainers work on the skeleton, the framework and the docs side by side: see

@@ -8,6 +8,7 @@
  * preloads the Latin file: {{ vite_preload(...) }}.
  */
 @import "@fontsource-variable/inter/wght.css";
+/*! Inter | SIL Open Font License 1.1 | Copyright 2016 The Inter Project Authors | https://rsms.me/inter/ | full text: /third-party-licenses.txt */
 
 /*
  * Icons: `<span class="icon-[lucide--sun]"></span>`. Only the icons used in templates end up in the
@@ -15,6 +16,7 @@
  * https://icon-sets.iconify.design and install one with `npm i -D @iconify-json/<set>` (Lucide is
  * installed). Your own SVGs go in resources/icons/: `icon-[app--<file name>]`.
  */
+/*! Lucide icons | ISC License, Copyright (c) 2026 Lucide Icons and Contributors; icons from Feather: MIT License, Copyright (c) 2013-present Cole Bemis | https://lucide.dev | full text: /third-party-licenses.txt */
 @plugin "@iconify/tailwind4" {
     icon-sets: from-folder(app, "./resources/icons");
 }

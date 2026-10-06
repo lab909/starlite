@@ -365,4 +365,5 @@ Kept here only as a reminder of what the Nocturne site will add on top of Starli
 - [ ] Real site name, description, default share image, author (`config/app.php`)
 - [ ] Languages for the project (`language`, `languages`) and `translations/*.php`
 - [ ] Production server: `.env` (`APP_URL`, `APP_SECRET`, `APP_OPCACHE`…), see README "Production setups"
+- [ ] Changed fonts, icons or scripts? Update `public/third-party-licenses.txt` and the `/*! … */` notices
 - [ ] Commit the site's own `composer.lock` (remove it from `.gitignore`); update the framework with `composer update starlite/framework`
