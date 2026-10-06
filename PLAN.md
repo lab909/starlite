@@ -325,8 +325,20 @@ favicon (the missing one logged a 404 on every page).
       the response; a failed alert is noted in the file. PHP warnings and fatal errors in production go
       through the logger (deprecations are left to PHP). `KernelTestCase::logged()`. Docs: Features →
       Logging (with the reasons), Servers → Access logs.
-- [ ] **Static export**: render every GET page to HTML at deploy time, served by nginx/Apache with
-      `try_files`; everything is ready for it (path-based URLs, no sessions, identical pages for all)
+- [x] **CDN caching** (opt-in, `CDN_CACHE=1`): pages get `s-maxage`, `stale-while-revalidate` and
+      `stale-if-error` (the CDN keeps serving them while the site is down); every route except
+      `cdn.exclude`, the Datastar endpoint, Datastar requests, content pages with `cdn: false`, pages with
+      a form, errors, and responses with their own `Cache-Control` (which now always wins). `ttl` an hour
+      when the CDN can be purged, 5 minutes otherwise. Purging: a `Purger` interface with Cloudflare,
+      Bunny and a shell command built in (`CDN_PURGE`), others from packages (`$app->cdn->usePurger()`);
+      `deploy` purges everything last; `bin/console cdn:purge blog/my-post | https://… | --all`.
+- [ ] **Static export** (to evaluate later; CDN caching gives most of the resilience first): render
+      pages to HTML at deploy, served by nginx/Apache with `try_files`, PHP behind for forms and
+      Datastar. Worth it for a cheap server without a CDN. Ideas so far: hybrid, opt-in **per route**
+      (`static.routes`); pages found through the sitemap plus their links; only 200, public, not
+      `no-store`; CSP as a `<meta>` tag (per page), the fixed security headers in the server config;
+      write only changed files, swap the folder in at once, `.gz` copies; `cache:clear` removes them.
+      Follow-up idea: the forms' timing token fetched through Datastar, so form pages can be static too
 - [ ] **Modal images** (lightbox): click an image in a post or page to see it large, in a modal over
       the page. A native `<dialog>` (focus trap, Esc and backdrop to close, focus back on the image),
       opened with Datastar or a small helper, loading a larger version from the image's `srcset`; works

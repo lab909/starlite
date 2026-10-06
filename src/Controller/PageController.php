@@ -47,6 +47,9 @@ final class PageController extends Controller
         }
         $this->app->site->setAlternates($alternates, $fallbacks);
         PageSeo::apply($this->app->seo, $page);
+        if (!$page['cdn']) {
+            $this->app->cdn->skip(); // `cdn: false` in the front matter: never cached at the CDN
+        }
 
         $request = $this->app->request();
         $form = null;

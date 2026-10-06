@@ -46,6 +46,19 @@ return [
         'days' => 14,
         'alert_to' => getenv('LOG_ALERT_TO') ?: null,
     ],
+    // Caching pages at a CDN (Cloudflare, Bunny…), off until CDN_CACHE=1: the CDN keeps each page for
+    // `ttl` seconds and keeps serving it while this server is down (`stale_if_error`). Every route is
+    // cached except those in `exclude`, content pages with `cdn: false`, pages with a form, and errors.
+    // `ttl` defaults to an hour when `deploy` can purge the CDN (CDN_PURGE), to 5 minutes otherwise.
+    // Purge single pages with `bin/console cdn:purge blog/my-post`.
+    'cdn' => [
+        'enabled' => getenv('CDN_CACHE') === '1',
+        'exclude' => ['clock'],
+        'purge' => getenv('CDN_PURGE') ?: null,   // cloudflare, bunny or command
+        'cloudflare' => ['zone' => getenv('CLOUDFLARE_ZONE_ID') ?: null, 'token' => getenv('CLOUDFLARE_API_TOKEN') ?: null],
+        'bunny' => ['pull_zone' => getenv('BUNNY_PULL_ZONE_ID') ?: null, 'key' => getenv('BUNNY_API_KEY') ?: null],
+        'command' => getenv('CDN_PURGE_CMD') ?: null,
+    ],
     // Comma-separated IPs/CIDRs of reverse proxies whose X-Forwarded-* headers are trusted ('REMOTE_ADDR' = the direct peer).
     'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) getenv('APP_TRUSTED_PROXIES'))))),
     // Default language: served without a URL prefix (/blog). Every other language in `languages`
